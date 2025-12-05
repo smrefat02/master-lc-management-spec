@@ -1,9 +1,15 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: INITIAL → 1.0.0
-Change Type: Initial Constitution Creation
-Date: 2025-12-04
+Version Change: 1.0.0 → 1.1.0
+Change Type: MINOR - Added Interactive UI & Modal Management Principles
+Date: 2025-12-05
+
+Principles Modified:
+- Added VI. Interactive UI Elements (NEW)
+- Added VII. Modal Management & State (NEW)
+- Strengthened CRUD requirements in Technical Standards
+- Updated Required Features to reflect completed implementation
 
 Principles Defined:
 - I. Contract Number Format Enforcement (STRICT)
@@ -11,11 +17,14 @@ Principles Defined:
 - III. Component Modularity
 - IV. End-to-End Testing (Playwright)
 - V. Clean Architecture & Maintainability
+- VI. Interactive UI Elements (NEW)
+- VII. Modal Management & State (NEW)
 
 Templates Status:
 ✅ plan-template.md - Aligned (constitution check present)
 ✅ spec-template.md - Aligned (user stories & acceptance criteria structure)
 ✅ tasks-template.md - Aligned (organized by user story, test tasks included)
+✅ All runtime fixes documented (API routes, CORS, imports)
 
 Follow-up TODOs: None - All placeholders resolved
 -->
@@ -88,29 +97,133 @@ Follow-up TODOs: None - All placeholders resolved
 
 **Rationale**: Clean architecture reduces technical debt, accelerates feature development, and makes the codebase accessible to new developers. Consistent patterns reduce cognitive load and prevent bugs.
 
+### VI. Interactive UI Elements
+
+**ALL UI buttons and interactive elements MUST be fully functional, never static or placeholder:**
+
+- "Add New Contract" button MUST open a working modal with auto-generated contract number
+- "Show" button MUST open a modal/drawer displaying full contract details via `GET /api/contracts/{id}`
+- "Edit" button MUST open a pre-filled modal loading data via `GET /api/contracts/{id}` and updating via `PUT /api/contracts/{id}`
+- After any create/update/delete action, the contract list MUST refresh automatically
+- No button may be disabled or non-functional in production code
+- All modals MUST support proper open/close state management and onSubmit callbacks
+
+**Rationale**: Users expect all visible UI elements to be functional. Static or placeholder buttons create confusion, frustration, and erode trust. Full functionality ensures the system meets business requirements and provides a professional user experience.
+
+### VII. Modal Management & State
+
+**MUST implement proper modal lifecycle and state management:**
+
+- Each modal type (Add, Show, Edit) MUST have:
+  - `open()` function to display modal
+  - `close()` function to hide modal
+  - `onSubmit()` callback to handle form submission
+  - Proper cleanup on close (reset form state, clear errors)
+- ContractsOverview page MUST manage:
+  - `openCreateModal()` - opens empty form for new contract
+  - `openShowModal(contractId)` - fetches and displays contract details
+  - `openEditModal(contractId)` - fetches contract data and opens edit form
+  - `refreshList()` - reloads contract list after mutations
+- ContractForm MUST support:
+  - **Create mode**: Empty form with auto-generated contract number
+  - **Edit mode**: Pre-populated form with disabled contract number field
+  - Mode detection via props or context
+- Modal state MUST NOT leak between opens (each open starts fresh)
+
+**Rationale**: Proper modal management prevents state bugs, memory leaks, and UI glitches. Clear lifecycle management ensures predictable behavior and maintainability. Supporting both create and edit modes in a single form component reduces code duplication.
+
 ## Technical Standards
 
 ### Technology Stack
 
-- **Frontend**: React with Tailwind CSS
-- **Backend**: Laravel (PHP) with validation and RESTful API design
-- **Testing**: Playwright for end-to-end tests
-- **Database**: Relational database with proper constraints (specific RDBMS to be determined during implementation)
+- **Frontend**: React 18+ with Vite, Tailwind CSS v4, Axios for API calls
+- **Backend**: Laravel 12 with RESTful API design and resource controllers
+- **Testing**: Playwright for end-to-end tests, PHPUnit for backend tests
+- **Database**: MySQL/MariaDB with foreign keys and constraints
 
-### Required Features
+### Required API Endpoints
 
-**Dashboard ( Contracts Overview):**
+**Contracts API:**
 
-- Summary cards displaying: Total Contracts, Total LC Value, Total Order Qty, Avg B2B %
-- Search functionality: Buyer name or Contract No
-- Filter functionality: Status
-- Data table with columns: Buyer Name, Contract No, Amendment Date, Total Orders, Order Quantity, Master LC Value, B2B %, Status Badge, Actions (Show/Edit)
-- Pagination controls
+- `GET /api/contracts` - List contracts with pagination, search, and filters
+- `GET /api/contracts/{id}` - Retrieve single contract with buyer details (MANDATORY for Show & Edit)
+- `POST /api/contracts` - Create new contract with validation
+- `PUT /api/contracts/{id}` - Update existing contract (MANDATORY for Edit functionality)
+- `GET /api/contracts/next-number?year={year}` - Get next available contract number
 
-**Add New Contract Modal:**
+**Buyers API:**
 
-- Fields: Buyer (dropdown), Contract No (auto-generated with manual edit capability), Contract Date, Amendment Date, Total Orders, Order Quantity, Total Contract Value (USD), Overall B2B %, Status, Remarks
-- Actions: Cancel, Save with validation enforcement
+- `GET /api/buyers` - List all buyers for dropdown selection
+
+**All endpoints MUST:**
+
+- Return proper HTTP status codes (200, 201, 400, 404, 422, 500)
+- Include validation errors in consistent format
+- Support CORS for frontend access
+- Return JSON responses with appropriate headers
+
+### Required React Components
+
+**Pages:**
+
+- `ContractsOverview` - Main dashboard page managing all modals and state
+
+**Modals:**
+
+- `AddContractModal` - Modal for creating new contracts
+- `ShowContractModal` - Read-only modal displaying contract details
+- `EditContractModal` - Modal for editing existing contracts
+
+**Shared Components:**
+
+- `ContractForm` - Reusable form supporting both create and edit modes
+- `SummaryCard` - Metric display cards for dashboard
+- `ContractTable` - Data table with Show/Edit buttons per row
+- `Pagination` - Pagination controls for contract list
+
+**All modals MUST:**
+
+- Support controlled open/close state
+- Fetch data when opened (for Show/Edit)
+- Refresh parent list on successful submission
+- Handle loading and error states
+- Provide clear user feedback
+
+### Required Features (Implementation Complete)
+
+**Dashboard (Contracts Overview):**
+
+- ✅ Summary cards displaying: Total Contracts, Total LC Value, Total Order Qty, Avg B2B %
+- ✅ Search functionality: Buyer name or Contract No
+- ✅ Filter functionality: Status (draft, active, completed, cancelled)
+- ✅ Data table with columns: Buyer Name, Contract No, Amendment Date, Total Orders, Order Quantity, Master LC Value, B2B %, Status Badge
+- ✅ Actions column with Show & Edit buttons (both fully functional)
+- ✅ Pagination controls (15 records per page)
+
+**Add New Contract (Fully Functional):**
+
+- ✅ Opens modal with auto-generated contract number (editable)
+- ✅ Fields: Buyer (dropdown), Contract No, Contract Date, Amendment Date, Total Orders, Order Quantity, Total Contract Value (USD), Overall B2B %, Status, Remarks
+- ✅ Frontend validation before submission
+- ✅ Backend validation with clear error messages
+- ✅ List refreshes after successful creation
+
+**Show Contract Details (Fully Functional):**
+
+- ✅ Opens modal displaying all contract fields in read-only format
+- ✅ Fetches data via `GET /api/contracts/{id}`
+- ✅ Shows buyer contact information
+- ✅ Proper loading and error states
+
+**Edit Contract (Fully Functional):**
+
+- ✅ Opens modal with pre-populated form
+- ✅ Fetches current data via `GET /api/contracts/{id}`
+- ✅ Contract number field disabled (cannot be changed)
+- ✅ All other fields editable
+- ✅ Updates via `PUT /api/contracts/{id}`
+- ✅ List refreshes after successful update
+- ✅ Validation enforced (frontend and backend)
 
 ### Performance & UX Standards
 
@@ -139,6 +252,11 @@ Before completing any feature:
 - [ ] Components are modular, single-purpose, and reusable
 - [ ] Playwright tests cover layout, validation, and functional workflows
 - [ ] Code follows clean architecture principles and uses Tailwind CSS consistently
+- [ ] All UI buttons are fully functional (no static/placeholder buttons)
+- [ ] Show button fetches and displays contract details via API
+- [ ] Edit button fetches data, allows editing, and updates via API
+- [ ] All modals support proper open/close/submit lifecycle
+- [ ] Contract list refreshes after create/update/delete operations
 
 ## Governance
 
@@ -166,4 +284,47 @@ This constitution supersedes all other development practices and guidelines. All
 - Implementation plans: `.specify/templates/plan-template.md`
 - Task lists: `.specify/templates/tasks-template.md`
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-04
+**Version**: 1.1.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-05
+
+---
+
+## Implementation Notes
+
+### Critical Runtime Fixes (2025-12-05)
+
+During initial deployment, the following issues were identified and resolved:
+
+1. **Laravel 12 API Route Registration**:
+
+   - Issue: API routes not automatically registered (breaking change from Laravel 11)
+   - Fix: Added `api: __DIR__.'/../routes/api.php'` to `bootstrap/app.php` withRouting() method
+   - Impact: All API endpoints now accessible
+
+2. **CORS Configuration**:
+
+   - Issue: Frontend (port 5174) blocked by CORS
+   - Fix: Added port 5174 to allowed origins in `config/cors.php`
+   - Config: `supports_credentials: true` for future Sanctum integration
+
+3. **Axios withCredentials**:
+
+   - Issue: CORS errors when credentials enabled without Sanctum
+   - Fix: Temporarily disabled `withCredentials` in axios config
+   - Future: Re-enable when implementing authentication
+
+4. **API Function Signatures**:
+
+   - Issue: `getContracts()` expected individual params but received object
+   - Fix: Updated to accept params object `{page, per_page, search, status}`
+   - Impact: Search and filter functionality now working
+
+5. **Import Statement Mismatch**:
+
+   - Issue: EditContractModal used default import for named export
+   - Fix: Changed to `import { ContractForm } from "./ContractForm"`
+
+6. **Tailwind CSS v4 PostCSS**:
+   - Issue: Direct tailwindcss plugin no longer supported
+   - Fix: Installed `@tailwindcss/postcss` package and updated config
+
+These fixes ensure all constitutional principles are upheld in the deployed application.

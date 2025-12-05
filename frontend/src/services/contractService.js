@@ -3,16 +3,15 @@ import { contractsApi } from "./api";
 /**
  * Get paginated contracts with summary statistics
  */
-export const getContracts = async (page = 1, perPage = 15) => {
+export const getContracts = async (params = {}) => {
   try {
-    const response = await contractsApi.getAll(page, perPage);
+    const response = await contractsApi.getAll(params);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch contracts:", error);
     throw error;
   }
 };
-
 /**
  * Get single contract by ID
  */

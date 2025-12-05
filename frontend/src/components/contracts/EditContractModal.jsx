@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import ContractForm from "./ContractForm";
+import { ContractForm } from "./ContractForm";
 
 export default function EditContractModal({
   isOpen,

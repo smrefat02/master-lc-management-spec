@@ -10,7 +10,7 @@ const api = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  withCredentials: true, // For Sanctum CSRF protection
+  withCredentials: false, // Disabled for now - enable when using Sanctum
 });
 
 // Request interceptor for error handling
@@ -34,8 +34,12 @@ api.interceptors.response.use(
 // Contract API endpoints
 export const contractsApi = {
   // Get all contracts with pagination
-  getAll: (page = 1, perPage = 15) => {
-    return api.get(`/contracts?page=${page}&per_page=${perPage}`);
+  getAll: (params = {}) => {
+    const { page = 1, per_page = 15, search, status } = params;
+    let url = `/contracts?page=${page}&per_page=${per_page}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (status) url += `&status=${status}`;
+    return api.get(url);
   },
 
   // Get single contract by ID

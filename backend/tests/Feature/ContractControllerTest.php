@@ -337,4 +337,273 @@ class ContractControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['buyer_id']);
     }
+
+    /**
+     * Test show method returns contract with buyer.
+     */
+    public function test_show_returns_contract_with_buyer()
+    {
+        $buyer = Buyer::factory()->create();
+        $contract = Contract::factory()->create([
+            'buyer_id' => $buyer->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+        ]);
+
+        $response = $this->getJson("/api/contracts/{$contract->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'contract' => [
+                    'id',
+                    'contract_no',
+                    'buyer_id',
+                    'buyer' => [
+                        'id',
+                        'name',
+                        'contact_email',
+                        'contact_phone',
+                        'address',
+                    ],
+                    'contract_date',
+                    'amendment_date',
+                    'total_orders',
+                    'order_quantity',
+                    'value_usd',
+                    'b2b_percent',
+                    'status',
+                    'remarks',
+                    'created_at',
+                    'updated_at',
+                ],
+            ])
+            ->assertJson([
+                'contract' => [
+                    'id' => $contract->id,
+                    'contract_no' => 'IIC/AKCL/CON/2025/01',
+                    'buyer_id' => $buyer->id,
+                ],
+            ]);
+    }
+
+    /**
+     * Test show method returns 404 for non-existent contract.
+     */
+    public function test_show_returns_404_for_non_existent_contract()
+    {
+        $response = $this->getJson('/api/contracts/99999');
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Contract not found',
+            ]);
+    }
+
+    /**
+     * Test update method successfully updates contract.
+     */
+    public function test_update_successfully_updates_contract()
+    {
+        $buyer = Buyer::factory()->create();
+        $newBuyer = Buyer::factory()->create(['name' => 'New Buyer Corp']);
+        
+        $contract = Contract::factory()->create([
+            'buyer_id' => $buyer->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+            'amendment_date' => '2025-01-01',
+            'total_orders' => 100,
+            'status' => 'draft',
+        ]);
+
+        $updateData = [
+            'contract_no' => 'IIC/AKCL/CON/2025/01', // Required but won't be updated
+            'buyer_id' => $newBuyer->id,
+            'contract_date' => '2025-01-15',
+            'amendment_date' => '2025-02-15',
+            'total_orders' => 200,
+            'order_quantity' => 10000,
+            'value_usd' => 500000.00,
+            'b2b_percent' => 55.5,
+            'status' => 'active',
+            'remarks' => 'Updated contract details',
+        ];
+
+        $response = $this->putJson("/api/contracts/{$contract->id}", $updateData);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Contract updated successfully',
+                'contract' => [
+                    'id' => $contract->id,
+                    'contract_no' => 'IIC/AKCL/CON/2025/01', // Should remain unchanged
+                    'buyer_id' => $newBuyer->id,
+                    'total_orders' => 200,
+                    'order_quantity' => 10000,
+                    'status' => 'active',
+                ],
+            ]);
+
+        // Verify database was updated
+        $this->assertDatabaseHas('contracts', [
+            'id' => $contract->id,
+            'buyer_id' => $newBuyer->id,
+            'total_orders' => 200,
+            'status' => 'active',
+        ]);
+    }
+
+    /**
+     * Test update returns 404 for non-existent contract.
+     */
+    public function test_update_returns_404_for_non_existent_contract()
+    {
+        $buyer = Buyer::factory()->create();
+        
+        $updateData = [
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+            'buyer_id' => $buyer->id,
+            'contract_date' => '2025-01-15',
+            'amendment_date' => '2025-01-15',
+            'total_orders' => 100,
+            'order_quantity' => 5000,
+            'value_usd' => 250000.00,
+            'b2b_percent' => 45.5,
+            'status' => 'draft',
+        ];
+
+        $response = $this->putJson('/api/contracts/99999', $updateData);
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Contract not found',
+            ]);
+    }
+
+    /**
+     * Test update validates amendment date is after or equal to contract date.
+     */
+    public function test_update_validates_amendment_date()
+    {
+        $buyer = Buyer::factory()->create();
+        $contract = Contract::factory()->create([
+            'buyer_id' => $buyer->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+        ]);
+
+        $updateData = [
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+            'buyer_id' => $buyer->id,
+            'contract_date' => '2025-02-15',
+            'amendment_date' => '2025-01-15', // Before contract date
+            'total_orders' => 100,
+            'order_quantity' => 5000,
+            'value_usd' => 250000.00,
+            'b2b_percent' => 45.5,
+            'status' => 'draft',
+        ];
+
+        $response = $this->putJson("/api/contracts/{$contract->id}", $updateData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['amendment_date']);
+    }
+
+    /**
+     * Test update validates B2B percentage range.
+     */
+    public function test_update_validates_b2b_percent_range()
+    {
+        $buyer = Buyer::factory()->create();
+        $contract = Contract::factory()->create([
+            'buyer_id' => $buyer->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+        ]);
+
+        // Test below minimum
+        $updateData = [
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+            'buyer_id' => $buyer->id,
+            'contract_date' => '2025-01-15',
+            'amendment_date' => '2025-01-15',
+            'total_orders' => 100,
+            'order_quantity' => 5000,
+            'value_usd' => 250000.00,
+            'b2b_percent' => -5,
+            'status' => 'draft',
+        ];
+
+        $response = $this->putJson("/api/contracts/{$contract->id}", $updateData);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['b2b_percent']);
+
+        // Test above maximum
+        $updateData['b2b_percent'] = 150;
+
+        $response = $this->putJson("/api/contracts/{$contract->id}", $updateData);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['b2b_percent']);
+    }
+
+    /**
+     * Test update validates buyer_id exists.
+     */
+    public function test_update_validates_buyer_exists()
+    {
+        $buyer = Buyer::factory()->create();
+        $contract = Contract::factory()->create([
+            'buyer_id' => $buyer->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+        ]);
+
+        $updateData = [
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+            'buyer_id' => 99999, // Non-existent buyer
+            'contract_date' => '2025-01-15',
+            'amendment_date' => '2025-01-15',
+            'total_orders' => 100,
+            'order_quantity' => 5000,
+            'value_usd' => 250000.00,
+            'b2b_percent' => 45.5,
+            'status' => 'draft',
+        ];
+
+        $response = $this->putJson("/api/contracts/{$contract->id}", $updateData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['buyer_id']);
+    }
+
+    /**
+     * Test update does not change contract_no even if provided.
+     */
+    public function test_update_does_not_change_contract_number()
+    {
+        $buyer = Buyer::factory()->create();
+        $contract = Contract::factory()->create([
+            'buyer_id' => $buyer->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01',
+        ]);
+
+        $updateData = [
+            'contract_no' => 'IIC/AKCL/CON/2025/99', // Try to change contract number
+            'buyer_id' => $buyer->id,
+            'contract_date' => '2025-01-15',
+            'amendment_date' => '2025-01-15',
+            'total_orders' => 200,
+            'order_quantity' => 5000,
+            'value_usd' => 250000.00,
+            'b2b_percent' => 45.5,
+            'status' => 'draft',
+        ];
+
+        $response = $this->putJson("/api/contracts/{$contract->id}", $updateData);
+
+        $response->assertStatus(200);
+
+        // Verify contract_no remains unchanged
+        $this->assertDatabaseHas('contracts', [
+            'id' => $contract->id,
+            'contract_no' => 'IIC/AKCL/CON/2025/01', // Original number
+            'total_orders' => 200, // But other fields are updated
+        ]);
+    }
 }

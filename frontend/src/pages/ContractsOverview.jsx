@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import SummaryCard from "../components/contracts/SummaryCard";
 import ContractTable from "../components/contracts/ContractTable";
 import { AddContractModal } from "../components/contracts/AddContractModal";
-import { getContracts } from "../services/contractService";
+import ViewContractModal from "../components/contracts/ViewContractModal";
+import EditContractModal from "../components/contracts/EditContractModal";
+import { getContracts, getContractById } from "../services/contractService";
 
 export default function ContractsOverview() {
   const navigate = useNavigate();
@@ -14,6 +16,9 @@ export default function ContractsOverview() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -47,12 +52,41 @@ export default function ContractsOverview() {
     setCurrentPage(page);
   };
 
-  const handleShowContract = (id) => {
-    navigate(`/contracts/${id}`);
+  const handleShowContract = async (id) => {
+    try {
+      const data = await getContractById(id);
+      setSelectedContract(data.contract);
+      setIsViewModalOpen(true);
+    } catch (err) {
+      console.error("Error fetching contract:", err);
+      setError("Failed to load contract details.");
+    }
   };
 
-  const handleEditContract = (id) => {
-    navigate(`/contracts/${id}/edit`);
+  const handleEditContract = async (id) => {
+    try {
+      const data = await getContractById(id);
+      setSelectedContract(data.contract);
+      setIsEditModalOpen(true);
+    } catch (err) {
+      console.error("Error fetching contract:", err);
+      setError("Failed to load contract details.");
+    }
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedContract(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedContract(null);
+  };
+
+  const handleContractUpdated = () => {
+    // Refresh the contracts list
+    fetchContracts(currentPage);
   };
 
   const handleAddContract = () => {
@@ -275,6 +309,20 @@ export default function ContractsOverview() {
           />
         )}
       </div>
+
+      {/* Modals */}
+      <ViewContractModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseViewModal}
+        contract={selectedContract}
+      />
+
+      <EditContractModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        contract={selectedContract}
+        onUpdated={handleContractUpdated}
+      />
     </div>
   );
 }

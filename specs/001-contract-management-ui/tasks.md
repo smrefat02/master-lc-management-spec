@@ -198,23 +198,23 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 ### Backend API for User Story 4
 
-- [ ] T061 [P] [US4] Implement ContractController show method in `backend/app/Http/Controllers/ContractController.php`: accept contract ID param, return single contract with eager-loaded buyer, return 404 if not found
-- [ ] T062 [P] [US4] Create UpdateContractRequest in `backend/app/Http/Requests/UpdateContractRequest.php`: same validation rules as StoreContractRequest except contract_no (required, regex but NOT unique check since updating same record), buyer_id through remarks fields
-- [ ] T063 [US4] Implement ContractController update method in `backend/app/Http/Controllers/ContractController.php`: accept contract ID param, use UpdateContractRequest for validation, wrap in DB transaction, update Contract record (exclude contract_no from fillable updates), return updated contract with buyer, return 404 if not found
-- [ ] T064 [US4] Update API routes in `backend/routes/api.php`: add `GET /api/contracts/{id}` to ContractController@show, add `PUT /api/contracts/{id}` to ContractController@update
+- [x] T061 [P] [US4] Implement ContractController show method in `backend/app/Http/Controllers/ContractController.php`: accept contract ID param, return single contract with eager-loaded buyer, return 404 if not found
+- [x] T062 [P] [US4] Create UpdateContractRequest in `backend/app/Http/Requests/UpdateContractRequest.php`: same validation rules as StoreContractRequest except contract_no (required, regex but NOT unique check since updating same record), buyer_id through remarks fields
+- [x] T063 [US4] Implement ContractController update method in `backend/app/Http/Controllers/ContractController.php`: accept contract ID param, use UpdateContractRequest for validation, wrap in DB transaction, update Contract record (exclude contract_no from fillable updates), return updated contract with buyer, return 404 if not found
+- [x] T064 [US4] Update API routes in `backend/routes/api.php`: add `GET /api/contracts/{id}` to ContractController@show, add `PUT /api/contracts/{id}` to ContractController@update
 
 ### Frontend Components for User Story 4
 
-- [ ] T065 [P] [US4] Create ViewContractModal component in `frontend/src/components/contracts/ViewContractModal.jsx`: use Headless UI Dialog, display all contract fields in read-only format, include Close button
-- [ ] T066 [P] [US4] Create EditContractModal component in `frontend/src/components/contracts/EditContractModal.jsx`: reuse ContractForm component, disable contract_no field (read-only with grey styling), accept contract prop to pre-populate form, different onSubmit handler calling update API
-- [ ] T067 [US4] Implement Show action in ContractTable: add click handler to Show button, fetch contract by ID via contractService.getContract(id), open ViewContractModal with fetched data
-- [ ] T068 [US4] Implement Edit action in ContractTable: add click handler to Edit button, fetch contract by ID, open EditContractModal with pre-populated data
-- [ ] T069 [US4] Extend contract service in `frontend/src/services/contractService.js`: add `getContract(id)` calling `GET /api/contracts/{id}`, add `updateContract(id, data)` calling `PUT /api/contracts/{id}`
-- [ ] T070 [US4] Implement update submission handler in EditContractModal: validate form, call contractService.updateContract(id, data), on success show toast, call onUpdated() callback to refresh table, close modal, on error display validation errors inline
+- [x] T065 [P] [US4] Create ViewContractModal component in `frontend/src/components/contracts/ViewContractModal.jsx`: use Headless UI Dialog, display all contract fields in read-only format, include Close button
+- [x] T066 [P] [US4] Create EditContractModal component in `frontend/src/components/contracts/EditContractModal.jsx`: reuse ContractForm component, disable contract_no field (read-only with grey styling), accept contract prop to pre-populate form, different onSubmit handler calling update API
+- [x] T067 [US4] Implement Show action in ContractTable: add click handler to Show button, fetch contract by ID via contractService.getContractById(id), open ViewContractModal with fetched data
+- [x] T068 [US4] Implement Edit action in ContractTable: add click handler to Edit button, fetch contract by ID, open EditContractModal with pre-populated data
+- [x] T069 [US4] Extend contract service in `frontend/src/services/contractService.js`: add `getContractById(id)` calling `GET /api/contracts/{id}`, add `updateContract(id, data)` calling `PUT /api/contracts/{id}` (already implemented)
+- [x] T070 [US4] Implement update submission handler in EditContractModal: validate form, call contractService.updateContract(id, data), on success show toast, call onUpdated() callback to refresh table, close modal, on error display validation errors inline
 
 ### Tests for User Story 4 (Playwright E2E)
 
-- [ ] T071 [P] [US4] Create view/edit workflow test in `frontend/tests/playwright/add-contract.spec.ts`: click Show button, verify modal opens with read-only data, close modal, click Edit button, verify modal opens with editable form pre-populated, modify Amendment Date field, click Save, verify success toast, verify changes reflected in table
+- [x] T071 [P] [US4] Create view/edit workflow test in `frontend/tests/playwright/view-edit-contract.spec.ts`: click Show button, verify modal opens with read-only data, close modal, click Edit button, verify modal opens with editable form pre-populated, modify Amendment Date field, click Save, verify success toast, verify changes reflected in table
 
 **Checkpoint**: All user stories complete - full feature functionality delivered
 

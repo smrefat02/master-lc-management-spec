@@ -70,7 +70,22 @@ export function ContractForm({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  defaultValues = null,
+  mode = "create", // "create" or "edit"
 }) {
+  const formDefaultValues = defaultValues || {
+    contract_no: initialContractNo,
+    buyer_id: "",
+    contract_date: "",
+    amendment_date: "",
+    total_orders: 0,
+    order_quantity: 0,
+    value_usd: 0,
+    b2b_percent: 0,
+    status: "draft",
+    remarks: "",
+  };
+
   const {
     register,
     handleSubmit,
@@ -79,18 +94,7 @@ export function ContractForm({
   } = useForm({
     resolver: zodResolver(contractSchema),
     mode: "onChange", // Real-time validation
-    defaultValues: {
-      contract_no: initialContractNo,
-      buyer_id: "",
-      contract_date: "",
-      amendment_date: "",
-      total_orders: 0,
-      order_quantity: 0,
-      value_usd: 0,
-      b2b_percent: 0,
-      status: "draft",
-      remarks: "",
-    },
+    defaultValues: formDefaultValues,
   });
 
   const statuses = ["draft", "active", "pending", "completed", "cancelled"];
@@ -129,14 +133,24 @@ export function ContractForm({
       <div>
         <label htmlFor="contract_no" className={labelClassName}>
           Contract Number <span className="text-red-500">*</span>
+          {mode === "edit" && (
+            <span className="ml-2 text-xs text-gray-500 font-normal">
+              (Cannot be changed)
+            </span>
+          )}
         </label>
         <input
           id="contract_no"
           type="text"
           {...register("contract_no")}
           placeholder="IIC/AKCL/CON/2025/01"
-          className={inputClassName}
-          disabled={isSubmitting}
+          className={`${inputClassName} ${
+            mode === "edit"
+              ? "bg-gray-100 text-gray-600 cursor-not-allowed"
+              : ""
+          }`}
+          disabled={mode === "edit" || isSubmitting}
+          readOnly={mode === "edit"}
         />
         {errors.contract_no && (
           <p className={errorClassName}>{errors.contract_no.message}</p>

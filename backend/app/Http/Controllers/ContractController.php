@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreContractRequest;
+use App\Http\Requests\UpdateContractRequest;
 use App\Models\Contract;
 use App\Services\ContractNumberService;
 use Illuminate\Http\Request;
@@ -144,6 +145,51 @@ class ContractController extends Controller
             
             // Re-throw other database exceptions
             throw $e;
+        }
+    }
+
+    /**
+     * Update an existing contract.
+     */
+    public function update(UpdateContractRequest $request, $id)
+    {
+        $contract = Contract::find($id);
+
+        if (!$contract) {
+            return response()->json([
+                'message' => 'Contract not found',
+            ], 404);
+        }
+
+        try {
+            // Use database transaction to ensure atomicity
+            $updatedContract = DB::transaction(function () use ($contract, $request) {
+                // Get validated data
+                $data = $request->validated();
+                
+                // Contract number should not be updated
+                // Remove it from the update data to prevent accidental changes
+                unset($data['contract_no']);
+                
+                // Update the contract
+                $contract->update($data);
+                
+                // Reload the buyer relationship
+                $contract->load('buyer');
+                
+                return $contract;
+            });
+
+            return response()->json([
+                'message' => 'Contract updated successfully',
+                'contract' => $updatedContract,
+            ], 200);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update contract',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }

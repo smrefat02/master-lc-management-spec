@@ -10,9 +10,10 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Contract routes
+// NOTE: Specific routes MUST come before parameterized routes
+Route::get('/contracts/next-number', [ContractController::class, 'nextNumber']);
 Route::get('/contracts', [ContractController::class, 'index']);
 Route::post('/contracts', [ContractController::class, 'store']);
-Route::get('/contracts/next-number', [ContractController::class, 'nextNumber']);
 Route::get('/contracts/{id}', [ContractController::class, 'show']);
 Route::put('/contracts/{id}', [ContractController::class, 'update']);
 

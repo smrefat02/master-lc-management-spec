@@ -44,4 +44,22 @@ class ContractController extends Controller
             'summary' => $summary,
         ]);
     }
+
+    /**
+     * Display a single contract with buyer details.
+     */
+    public function show($id)
+    {
+        $contract = Contract::with('buyer')->find($id);
+
+        if (!$contract) {
+            return response()->json([
+                'message' => 'Contract not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'contract' => $contract,
+        ]);
+    }
 }

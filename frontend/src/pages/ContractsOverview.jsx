@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import SummaryCard from "../components/contracts/SummaryCard";
 import ContractTable from "../components/contracts/ContractTable";
 import { getContracts } from "../services/contractService";
 
 export default function ContractsOverview() {
+  const navigate = useNavigate();
   const [contracts, setContracts] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -36,13 +38,11 @@ export default function ContractsOverview() {
   };
 
   const handleShowContract = (id) => {
-    // TODO: Navigate to contract detail page
-    console.log("Show contract:", id);
+    navigate(`/contracts/${id}`);
   };
 
   const handleEditContract = (id) => {
-    // TODO: Navigate to edit contract page
-    console.log("Edit contract:", id);
+    navigate(`/contracts/${id}/edit`);
   };
 
   const formatCurrency = (value) => {

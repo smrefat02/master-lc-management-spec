@@ -60,16 +60,16 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T013 Create buyers migration: `backend/database/migrations/YYYY_MM_DD_create_buyers_table.php` with id, name (UNIQUE), contact_email, contact_phone, address, timestamps
-- [ ] T014 Create contracts migration: `backend/database/migrations/YYYY_MM_DD_create_contracts_table.php` with id, buyer_id (FK), contract_no (UNIQUE), contract_date, amendment_date, total_orders, order_quantity, value_usd DECIMAL(14,2), b2b_percent DECIMAL(6,2), status (default 'draft'), remarks TEXT, timestamps
-- [ ] T015 [P] Create Buyer model: `backend/app/Models/Buyer.php` with `hasMany` relationship to Contract, fillable fields
-- [ ] T016 [P] Create Contract model: `backend/app/Models/Contract.php` with `belongsTo` relationship to Buyer, fillable fields, status enum/casts
-- [ ] T017 [P] Create BuyerSeeder: `backend/database/seeders/BuyerSeeder.php` with 5-10 sample buyers (diverse names for testing search)
-- [ ] T018 [P] Create ContractSeeder: `backend/database/seeders/ContractSeeder.php` with 20-30 sample contracts across years 2023-2025, valid contract numbers
-- [ ] T019 Run migrations and seed database: `php artisan migrate:fresh --seed`
-- [ ] T020 Create ContractNumberService: `backend/app/Services/ContractNumberService.php` with `generateNextNumber($year)` method - query latest contract for year, extract NN, increment, pad to 2 digits, use DB transaction with lockForUpdate()
-- [ ] T021 Create base API utility: `frontend/src/services/api.js` - configure Axios instance with `baseURL: import.meta.env.VITE_API_URL`, `withCredentials: true`, error interceptor
-- [ ] T022 Write unit test for ContractNumberService: `backend/tests/Unit/ContractNumberServiceTest.php` - test empty DB returns `/YYYY/01`, test last `/YYYY/09` returns `/YYYY/10`, test invalid year returns error
+- [x] T013 Create buyers migration: `backend/database/migrations/YYYY_MM_DD_create_buyers_table.php` with id, name (UNIQUE), contact_email, contact_phone, address, timestamps
+- [x] T014 Create contracts migration: `backend/database/migrations/YYYY_MM_DD_create_contracts_table.php` with id, buyer_id (FK), contract_no (UNIQUE), contract_date, amendment_date, total_orders, order_quantity, value_usd DECIMAL(14,2), b2b_percent DECIMAL(6,2), status (default 'draft'), remarks TEXT, timestamps
+- [x] T015 [P] Create Buyer model: `backend/app/Models/Buyer.php` with `hasMany` relationship to Contract, fillable fields
+- [x] T016 [P] Create Contract model: `backend/app/Models/Contract.php` with `belongsTo` relationship to Buyer, fillable fields, status enum/casts
+- [x] T017 [P] Create BuyerSeeder: `backend/database/seeders/BuyerSeeder.php` with 5-10 sample buyers (diverse names for testing search)
+- [x] T018 [P] Create ContractSeeder: `backend/database/seeders/ContractSeeder.php` with 20-30 sample contracts across years 2023-2025, valid contract numbers
+- [x] T019 Run migrations and seed database: `php artisan migrate:fresh --seed`
+- [x] T020 Create ContractNumberService: `backend/app/Services/ContractNumberService.php` with `generateNextNumber($year)` method - query latest contract for year, extract NN, increment, pad to 2 digits, use DB transaction with lockForUpdate()
+- [x] T021 Create base API utility: `frontend/src/services/api.js` - configure Axios instance with `baseURL: import.meta.env.VITE_API_URL`, `withCredentials: true`, error interceptor
+- [x] T022 Write unit test for ContractNumberService: `backend/tests/Unit/ContractNumberServiceTest.php` - test empty DB returns `/YYYY/01`, test last `/YYYY/09` returns `/YYYY/10`, test invalid year returns error
 
 **Checkpoint**: Migrations applied, models ready, service tested - foundation complete
 

@@ -149,9 +149,9 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T050 [P] [US2] Create contract creation workflow test in `frontend/tests/playwright/add-contract.spec.ts`: click "Add New Contract" button, verify modal opens, verify Contract No auto-populates with correct format, fill all required fields with valid data, click Save, verify success toast, verify modal closes, verify new contract appears in table with correct data
-- [ ] T051 [P] [US2] Create contract validation test in `frontend/tests/playwright/add-contract.spec.ts`: open modal, manually edit Contract No to invalid formats (test cases: missing prefix "AKCL/CON/2025/01", wrong year digits "IIC/AKCL/CON/25/01", missing NN "IIC/AKCL/CON/2025/"), verify inline error message appears for each case, verify Save button disabled
-- [ ] T052 [P] [US2] Create error handling test in `frontend/tests/playwright/add-contract.spec.ts`: test duplicate contract_no (create contract, try to create again with same number), verify backend error toast visible, test missing required fields (submit form with empty buyer), verify inline errors, test backend validation failure scenarios
+- [x] T050 [P] [US2] Create contract creation workflow test in `frontend/tests/playwright/add-contract.spec.ts`: click "Add New Contract" button, verify modal opens, verify Contract No auto-populates with correct format, fill all required fields with valid data, click Save, verify success toast, verify modal closes, verify new contract appears in table with correct data
+- [x] T051 [P] [US2] Create contract validation test in `frontend/tests/playwright/add-contract.spec.ts`: open modal, manually edit Contract No to invalid formats (test cases: missing prefix "AKCL/CON/2025/01", wrong year digits "IIC/AKCL/CON/25/01", missing NN "IIC/AKCL/CON/2025/"), verify inline error message appears for each case, verify Save button disabled
+- [x] T052 [P] [US2] Create error handling test in `frontend/tests/playwright/add-contract.spec.ts`: test duplicate contract_no (create contract, try to create again with same number), verify backend error toast visible, test missing required fields (submit form with empty buyer), verify inline errors, test backend validation failure scenarios
 
 **Checkpoint**: User Story 2 complete - users can create contracts with auto-generated numbers and validation, all tests pass
 

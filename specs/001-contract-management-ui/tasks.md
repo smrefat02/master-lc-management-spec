@@ -85,28 +85,28 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 ### Backend Implementation for User Story 1
 
-- [ ] T023 [US1] Implement ContractController index method in `backend/app/Http/Controllers/ContractController.php`: return paginated contracts with eager-loaded buyer relationship, calculate summary statistics (total count, sum value_usd, sum order_quantity, avg b2b_percent), support query params for search/filter/pagination
-- [ ] T024 [P] [US1] Implement BuyerController index method in `backend/app/Http/Controllers/BuyerController.php`: return all buyers for dropdown (id, name only)
-- [ ] T025 [US1] Update API routes in `backend/routes/api.php`: define `GET /api/contracts`, `GET /api/buyers` routes to ContractController@index and BuyerController@index
+- [x] T023 [US1] Implement ContractController index method in `backend/app/Http/Controllers/ContractController.php`: return paginated contracts with eager-loaded buyer relationship, calculate summary statistics (total count, sum value_usd, sum order_quantity, avg b2b_percent), support query params for search/filter/pagination
+- [x] T024 [P] [US1] Implement BuyerController index method in `backend/app/Http/Controllers/BuyerController.php`: return all buyers for dropdown (id, name only)
+- [x] T025 [US1] Update API routes in `backend/routes/api.php`: define `GET /api/contracts`, `GET /api/buyers` routes to ContractController@index and BuyerController@index
 
 ### Frontend Components for User Story 1
 
-- [ ] T026 [P] [US1] Create SummaryCard component in `frontend/src/components/contracts/SummaryCard.jsx`: accept props (title, value, description), use Tailwind for card styling
-- [ ] T027 [P] [US1] Create StatusBadge component in `frontend/src/components/contracts/StatusBadge.jsx`: color mapping (Draft=gray, Active=green, Pending=yellow, Completed=blue, Cancelled=red)
-- [ ] T028 [US1] Create ContractTable component in `frontend/src/components/contracts/ContractTable.jsx`: render table with columns (Buyer Name, Contract No, Amendment Date, Total Orders, Order Quantity, Master LC Value USD, B2B %, Status badge, Actions), include pagination controls (Previous/Next, page size 10/20/50), Show/Edit placeholder buttons
-- [ ] T029 [US1] Create contract service in `frontend/src/services/contractService.js`: implement `getContracts(params)` calling `GET /api/contracts` with query params, handle response/error
+- [x] T026 [P] [US1] Create SummaryCard component in `frontend/src/components/contracts/SummaryCard.jsx`: accept props (title, value, description), use Tailwind for card styling
+- [x] T027 [P] [US1] Create StatusBadge component in `frontend/src/components/contracts/StatusBadge.jsx`: color mapping (Draft=gray, Active=green, Pending=yellow, Completed=blue, Cancelled=red)
+- [x] T028 [US1] Create ContractTable component in `frontend/src/components/contracts/ContractTable.jsx`: render table with columns (Buyer Name, Contract No, Amendment Date, Total Orders, Order Quantity, Master LC Value USD, B2B %, Status badge, Actions), include pagination controls (Previous/Next, page size 10/20/50), Show/Edit placeholder buttons
+- [x] T029 [US1] Create contract service in `frontend/src/services/contractService.js`: implement `getContracts(params)` calling `GET /api/contracts` with query params, handle response/error
 
 ### Page Integration for User Story 1
 
-- [ ] T030 [US1] Implement ContractsOverview page in `frontend/src/pages/ContractsOverview.jsx`: fetch contracts on mount via contractService.getContracts(), render 4 SummaryCards (Total Contracts, Total LC Value, Total Order Qty, Avg B2B %), render ContractTable with fetched data, handle loading/error states, include "Add New Contract" button (non-functional for now)
-- [ ] T031 [US1] Style ContractsOverview with Tailwind CSS: match screenshot layout (summary cards in responsive grid, proper spacing, table styling, button styling)
+- [x] T030 [US1] Implement ContractsOverview page in `frontend/src/pages/ContractsOverview.jsx`: fetch contracts on mount via contractService.getContracts(), render 4 SummaryCards (Total Contracts, Total LC Value, Total Order Qty, Avg B2B %), render ContractTable with fetched data, handle loading/error states, include "Add New Contract" button (non-functional for now)
+- [x] T031 [US1] Style ContractsOverview with Tailwind CSS: match screenshot layout (summary cards in responsive grid, proper spacing, table styling, button styling)
 
 ### Tests for User Story 1 (Playwright E2E)
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T032 [P] [US1] Create dashboard layout test in `frontend/tests/playwright/contracts-overview.spec.ts`: navigate to `/`, verify page title, verify 4 summary cards exist, verify contract table exists, verify "Add New Contract" button exists
-- [ ] T033 [P] [US1] Create contract list test in `frontend/tests/playwright/contracts-overview.spec.ts`: verify table has correct column headers (Buyer Name, Contract No, etc.), verify table renders data rows, verify pagination controls visible
+- [x] T032 [P] [US1] Create dashboard layout test in `frontend/tests/playwright/contracts-overview.spec.ts`: navigate to `/`, verify page title, verify 4 summary cards exist, verify contract table exists, verify "Add New Contract" button exists
+- [x] T033 [P] [US1] Create contract list test in `frontend/tests/playwright/contracts-overview.spec.ts`: verify table has correct column headers (Buyer Name, Contract No, etc.), verify table renders data rows, verify pagination controls visible
 
 **Checkpoint**: User Story 1 complete - dashboard displays with real data, all tests pass
 

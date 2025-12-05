@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import SummaryCard from "../components/contracts/SummaryCard";
 import ContractTable from "../components/contracts/ContractTable";
@@ -14,16 +14,24 @@ export default function ContractsOverview() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     fetchContracts(currentPage);
-  }, [currentPage]);
+  }, [currentPage, searchTerm, statusFilter]);
 
   const fetchContracts = async (page) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getContracts(page, 15);
+      const params = {
+        page,
+        per_page: 15,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter && { status: statusFilter }),
+      };
+      const data = await getContracts(params);
       setContracts(data.contracts);
       setPagination(data.pagination);
       setSummary(data.summary);
@@ -58,6 +66,22 @@ export default function ContractsOverview() {
   const handleContractCreated = (newContract) => {
     // Refresh the contracts list
     fetchContracts(1);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const handleStatusFilterChange = (e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page on filter
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("");
     setCurrentPage(1);
   };
 
@@ -155,14 +179,101 @@ export default function ContractsOverview() {
           </div>
         )}
 
+        {/* Search and Filter Bar */}
+        <div className="bg-white shadow rounded-lg p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Input */}
+            <div className="flex-1">
+              <label htmlFor="search" className="sr-only">
+                Search contracts
+              </label>
+              <input
+                type="text"
+                id="search"
+                placeholder="Search by buyer name or contract number..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div className="w-full sm:w-48">
+              <label htmlFor="status" className="sr-only">
+                Filter by status
+              </label>
+              <select
+                id="status"
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            {/* Clear Filters Button */}
+            {(searchTerm || statusFilter) && (
+              <button
+                onClick={handleClearFilters}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Empty State */}
+        {!loading && contracts.length === 0 && (
+          <div className="bg-white shadow rounded-lg p-12 text-center">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No contracts found
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {searchTerm || statusFilter
+                ? "Try adjusting your search or filter criteria."
+                : "Get started by creating a new contract."}
+            </p>
+            {(searchTerm || statusFilter) && (
+              <button
+                onClick={handleClearFilters}
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Contracts Table */}
-        <ContractTable
-          contracts={contracts}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-          onShowContract={handleShowContract}
-          onEditContract={handleEditContract}
-        />
+        {contracts.length > 0 && (
+          <ContractTable
+            contracts={contracts}
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onShowContract={handleShowContract}
+            onEditContract={handleEditContract}
+          />
+        )}
       </div>
     </div>
   );

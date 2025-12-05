@@ -18,28 +18,41 @@ class ContractController extends Controller
     }
     /**
      * Display a paginated list of contracts with summary statistics.
+     * Supports search and filter parameters.
      */
     public function index(Request $request)
     {
-        // Validate pagination parameters
+        // Validate pagination and filter parameters
         $request->validate([
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
+            'search' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:draft,active,pending,completed,cancelled',
         ]);
 
         $perPage = $request->input('per_page', 15);
+        $search = $request->input('search');
+        $status = $request->input('status');
         
-        // Eager load buyer relationship and paginate
-        $contracts = Contract::with('buyer')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        // Build query with search and filter scopes
+        $query = Contract::with('buyer')
+            ->search($search)
+            ->byStatus($status)
+            ->orderBy('created_at', 'desc');
         
-        // Calculate summary statistics
+        // Paginate results
+        $contracts = $query->paginate($perPage);
+        
+        // Calculate summary statistics based on filtered results
+        $summaryQuery = Contract::query()
+            ->search($search)
+            ->byStatus($status);
+            
         $summary = [
-            'total_contracts' => Contract::count(),
-            'total_value_usd' => Contract::sum('value_usd'),
-            'total_order_quantity' => Contract::sum('order_quantity'),
-            'avg_b2b_percent' => Contract::avg('b2b_percent'),
+            'total_contracts' => $summaryQuery->count(),
+            'total_value_usd' => $summaryQuery->sum('value_usd'),
+            'total_order_quantity' => $summaryQuery->sum('order_quantity'),
+            'avg_b2b_percent' => $summaryQuery->avg('b2b_percent'),
         ];
         
         return response()->json([

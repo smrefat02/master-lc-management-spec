@@ -167,20 +167,20 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 ### Backend Enhancement for User Story 3
 
-- [ ] T053 [US3] Enhance ContractController index method in `backend/app/Http/Controllers/ContractController.php`: add support for query params `search` (search in contract_no or buyer.name using LIKE with wildcard), `status` (exact match filter), apply filters to query before pagination, update summary statistics to reflect filtered results
-- [ ] T054 [P] [US3] Add query scopes to Contract model in `backend/app/Models/Contract.php`: create `scopeSearch($query, $term)` applying WHERE contract_no LIKE OR joining buyers table WHERE name LIKE, create `scopeByStatus($query, $status)` applying WHERE status =
+- [x] T053 [US3] Enhance ContractController index method in `backend/app/Http/Controllers/ContractController.php`: add support for query params `search` (search in contract_no or buyer.name using LIKE with wildcard), `status` (exact match filter), apply filters to query before pagination, update summary statistics to reflect filtered results
+- [x] T054 [P] [US3] Add query scopes to Contract model in `backend/app/Models/Contract.php`: create `scopeSearch($query, $term)` applying WHERE contract_no LIKE OR joining buyers table WHERE name LIKE, create `scopeByStatus($query, $status)` applying WHERE status =
 
 ### Frontend Enhancement for User Story 3
 
-- [ ] T055 [P] [US3] Add search input to ContractsOverview in `frontend/src/pages/ContractsOverview.jsx`: text input with placeholder "Search by buyer name or contract number", implement debounced onChange (300ms delay) to avoid excessive API calls
-- [ ] T056 [P] [US3] Add status filter dropdown to ContractsOverview: select element with options "All Statuses", "Draft", "Active", "Pending", "Completed", "Cancelled", onChange triggers filter update
-- [ ] T057 [US3] Implement filter logic in ContractsOverview: maintain search and status state, when either changes call contractService.getContracts() with updated params, update table data, reset to page 1 on filter change
-- [ ] T058 [US3] Add Clear/Reset functionality: button to reset search input and status filter to defaults, reload full unfiltered contract list
-- [ ] T059 [US3] Add loading and empty state feedback: show spinner while filtering, display "No results found" message when filtered results are empty
+- [x] T055 [P] [US3] Add search input to ContractsOverview in `frontend/src/pages/ContractsOverview.jsx`: text input with placeholder "Search by buyer name or contract number", implement debounced onChange (300ms delay) to avoid excessive API calls
+- [x] T056 [P] [US3] Add status filter dropdown to ContractsOverview: select element with options "All Statuses", "Draft", "Active", "Pending", "Completed", "Cancelled", onChange triggers filter update
+- [x] T057 [US3] Implement filter logic in ContractsOverview: maintain search and status state, when either changes call contractService.getContracts() with updated params, update table data, reset to page 1 on filter change
+- [x] T058 [US3] Add Clear/Reset functionality: button to reset search input and status filter to defaults, reload full unfiltered contract list
+- [x] T059 [US3] Add loading and empty state feedback: show spinner while filtering, display "No results found" message when filtered results are empty
 
 ### Tests for User Story 3 (Playwright E2E)
 
-- [ ] T060 [P] [US3] Create search and filter test in `frontend/tests/playwright/contracts-overview.spec.ts`: test search by buyer name (verify filtered results), test search by contract number (verify filtered results), test status filter (select "Active", verify only Active contracts shown), test combined search + status filter, test clear filters returns all data
+- [x] T060 [P] [US3] Create search and filter test in `frontend/tests/playwright/search-filter.spec.ts`: test search by buyer name (verify filtered results), test search by contract number (verify filtered results), test status filter (select "Active", verify only Active contracts shown), test combined search + status filter, test clear filters returns all data
 
 **Checkpoint**: User Stories 1, 2, AND 3 complete - full P1+P2 functionality delivered, all tests pass
 

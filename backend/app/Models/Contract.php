@@ -33,4 +33,41 @@ class Contract extends Model
     {
         return $this->belongsTo(Buyer::class);
     }
+
+    /**
+     * Scope a query to search contracts by contract number or buyer name.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $searchTerm
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearch($query, $searchTerm)
+    {
+        if (empty($searchTerm)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($searchTerm) {
+            $q->where('contract_no', 'like', "%{$searchTerm}%")
+              ->orWhereHas('buyer', function ($buyerQuery) use ($searchTerm) {
+                  $buyerQuery->where('name', 'like', "%{$searchTerm}%");
+              });
+        });
+    }
+
+    /**
+     * Scope a query to filter contracts by status.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $status
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeByStatus($query, $status)
+    {
+        if (empty($status)) {
+            return $query;
+        }
+
+        return $query->where('status', $status);
+    }
 }

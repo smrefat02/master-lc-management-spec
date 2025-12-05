@@ -122,16 +122,16 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 ### Backend API for Contract Number Generation (User Story 2)
 
-- [ ] T034 [US2] Implement ContractController nextNumber method in `backend/app/Http/Controllers/ContractController.php`: accept query param `year` (required, 4 digits), call ContractNumberService.generateNextNumber(year), return JSON `{"contract_no": "IIC/AKCL/CON/YYYY/NN"}`, validate year format, return 400 for invalid year
-- [ ] T035 [US2] Update API routes in `backend/routes/api.php`: add `GET /api/contracts/next-number` route to ContractController@nextNumber
-- [ ] T036 [P] [US2] Write unit test for nextNumber endpoint in `backend/tests/Feature/ContractControllerTest.php`: test empty DB returns `/YYYY/01`, test last `/YYYY/09` returns `/YYYY/10`, test invalid year returns 400
+- [x] T034 [US2] Implement ContractController nextNumber method in `backend/app/Http/Controllers/ContractController.php`: accept query param `year` (required, 4 digits), call ContractNumberService.generateNextNumber(year), return JSON `{"contract_no": "IIC/AKCL/CON/YYYY/NN"}`, validate year format, return 400 for invalid year
+- [x] T035 [US2] Update API routes in `backend/routes/api.php`: add `GET /api/contracts/next-number` route to ContractController@nextNumber
+- [x] T036 [P] [US2] Write unit test for nextNumber endpoint in `backend/tests/Feature/ContractControllerTest.php`: test empty DB returns `/YYYY/01`, test last `/YYYY/09` returns `/YYYY/10`, test invalid year returns 400
 
 ### Backend API for Contract Creation (User Story 2)
 
-- [ ] T037 [US2] Create StoreContractRequest in `backend/app/Http/Requests/StoreContractRequest.php`: validation rules for contract_no (required, regex `/^IIC\/AKCL\/CON\/\d{4}\/\d{2}$/`, unique:contracts), buyer_id (required, exists:buyers,id), contract_date (required, date), amendment_date (nullable, date, after_or_equal:contract_date), total_orders (required, integer, min:0), order_quantity (required, integer, min:0), value_usd (required, numeric, min:0), b2b_percent (required, numeric, min:0, max:100), status (required, in:draft,active,pending,completed,cancelled), remarks (nullable, string, max:1000)
-- [ ] T038 [US2] Implement ContractController store method in `backend/app/Http/Controllers/ContractController.php`: use StoreContractRequest for validation, wrap in DB transaction, create Contract record, return 201 with created contract (eager load buyer), handle duplicate contract_no error with 422 response
-- [ ] T039 [US2] Update API routes in `backend/routes/api.php`: add `POST /api/contracts` route to ContractController@store
-- [ ] T040 [P] [US2] Write unit tests for store endpoint in `backend/tests/Feature/ContractControllerTest.php`: test valid create returns 201, test invalid contract_no regex returns 422, test duplicate contract_no returns 422, test missing required fields returns 422
+- [x] T037 [US2] Create StoreContractRequest in `backend/app/Http/Requests/StoreContractRequest.php`: validation rules for contract_no (required, regex `/^IIC\/AKCL\/CON\/\d{4}\/\d{2}$/`, unique:contracts), buyer_id (required, exists:buyers,id), contract_date (required, date), amendment_date (nullable, date, after_or_equal:contract_date), total_orders (required, integer, min:0), order_quantity (required, integer, min:0), value_usd (required, numeric, min:0), b2b_percent (required, numeric, min:0, max:100), status (required, in:draft,active,pending,completed,cancelled), remarks (nullable, string, max:1000)
+- [x] T038 [US2] Implement ContractController store method in `backend/app/Http/Controllers/ContractController.php`: use StoreContractRequest for validation, wrap in DB transaction, create Contract record, return 201 with created contract (eager load buyer), handle duplicate contract_no error with 422 response
+- [x] T039 [US2] Update API routes in `backend/routes/api.php`: add `POST /api/contracts` route to ContractController@store
+- [x] T040 [P] [US2] Write unit tests for store endpoint in `backend/tests/Feature/ContractControllerTest.php`: test valid create returns 201, test invalid contract_no regex returns 422, test duplicate contract_no returns 422, test missing required fields returns 422
 
 ### Frontend Form and Modal (User Story 2)
 

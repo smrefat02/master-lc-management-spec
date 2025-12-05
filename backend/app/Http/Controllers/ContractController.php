@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreContractRequest;
 use App\Models\Contract;
+use App\Services\ContractNumberService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ContractController extends Controller
 {
+    protected ContractNumberService $contractNumberService;
+
+    public function __construct(ContractNumberService $contractNumberService)
+    {
+        $this->contractNumberService = $contractNumberService;
+    }
     /**
      * Display a paginated list of contracts with summary statistics.
      */
@@ -61,5 +70,67 @@ class ContractController extends Controller
         return response()->json([
             'contract' => $contract,
         ]);
+    }
+
+    /**
+     * Get the next available contract number for a given year.
+     */
+    public function nextNumber(Request $request)
+    {
+        // Validate year parameter
+        $validated = $request->validate([
+            'year' => 'required|integer|digits:4|min:2000|max:2100',
+        ]);
+
+        try {
+            $contractNumber = $this->contractNumberService->generateNextNumber($validated['year']);
+            
+            return response()->json([
+                'contract_no' => $contractNumber,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to generate contract number',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Store a newly created contract.
+     */
+    public function store(StoreContractRequest $request)
+    {
+        try {
+            // Use database transaction to ensure atomicity
+            $contract = DB::transaction(function () use ($request) {
+                // Create the contract
+                $contract = Contract::create($request->validated());
+                
+                // Load the buyer relationship
+                $contract->load('buyer');
+                
+                return $contract;
+            });
+
+            return response()->json([
+                'message' => 'Contract created successfully',
+                'contract' => $contract,
+            ], 201);
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle duplicate contract number error
+            if ($e->errorInfo[1] === 1062) { // MySQL duplicate entry error code
+                return response()->json([
+                    'message' => 'Contract number already exists',
+                    'errors' => [
+                        'contract_no' => ['This contract number already exists.'],
+                    ],
+                ], 422);
+            }
+            
+            // Re-throw other database exceptions
+            throw $e;
+        }
     }
 }

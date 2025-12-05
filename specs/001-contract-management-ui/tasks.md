@@ -135,15 +135,15 @@ description: "Implementation worklist for LC Management (Contracts Module)"
 
 ### Frontend Form and Modal (User Story 2)
 
-- [ ] T041 [P] [US2] Create ContractForm component in `frontend/src/components/contracts/ContractForm.jsx`: use React Hook Form, include fields (Buyer dropdown, Contract No input, Contract Date, Amendment Date, Total Orders, Order Quantity, Total Contract Value USD, Overall B2B %, Status dropdown, Remarks textarea), implement Zod validation schema matching backend rules, display inline error messages below each field
-- [ ] T042 [US2] Add contract number validation to ContractForm: regex pattern `^IIC\/AKCL\/CON\/\d{4}\/\d{2}$`, inline error message "Invalid contract number format. Must match: IIC/AKCL/CON/YYYY/NN", disable Save button when validation fails
-- [ ] T043 [P] [US2] Create AddContractModal component in `frontend/src/components/contracts/AddContractModal.jsx`: use Headless UI Dialog, accept props (isOpen, onClose, onCreated), render ContractForm inside modal, include Cancel and Save buttons, smooth open/close animations
-- [ ] T044 [US2] Implement auto-generation in AddContractModal: on modal open, determine year from current date or contract_date field, call contractService.getNextNumber(year), populate Contract No field in ContractForm with returned value
-- [ ] T045 [US2] Implement modal trigger in ContractsOverview: add state for modal open/close, connect "Add New Contract" button to open modal, pass onCreated callback to refresh table
-- [ ] T046 [US2] Extend contract service in `frontend/src/services/contractService.js`: add `getNextNumber(year)` calling `GET /api/contracts/next-number?year=${year}`, add `createContract(data)` calling `POST /api/contracts` with contract data
-- [ ] T047 [P] [US2] Create buyer service in `frontend/src/services/buyerService.js`: implement `getBuyers()` calling `GET /api/buyers`, return array of {id, name}
-- [ ] T048 [US2] Load buyers in AddContractModal: fetch buyers on modal open via buyerService.getBuyers(), populate dropdown, handle loading state
-- [ ] T049 [US2] Implement form submission handler in ContractForm: on Save click, validate form, call contractService.createContract(data), on success show toast notification, call onCreated() callback, close modal, on error display backend validation errors inline (map API errors to form fields), show toast for server errors
+- [x] T041 [P] [US2] Create ContractForm component in `frontend/src/components/contracts/ContractForm.jsx`: use React Hook Form, include fields (Buyer dropdown, Contract No input, Contract Date, Amendment Date, Total Orders, Order Quantity, Total Contract Value USD, Overall B2B %, Status dropdown, Remarks textarea), implement Zod validation schema matching backend rules, display inline error messages below each field
+- [x] T042 [US2] Add contract number validation to ContractForm: regex pattern `^IIC\/AKCL\/CON\/\d{4}\/\d{2}$`, inline error message "Invalid contract number format. Must match: IIC/AKCL/CON/YYYY/NN", disable Save button when validation fails
+- [x] T043 [P] [US2] Create AddContractModal component in `frontend/src/components/contracts/AddContractModal.jsx`: use Headless UI Dialog, accept props (isOpen, onClose, onCreated), render ContractForm inside modal, include Cancel and Save buttons, smooth open/close animations
+- [x] T044 [US2] Implement auto-generation in AddContractModal: on modal open, determine year from current date or contract_date field, call contractService.getNextNumber(year), populate Contract No field in ContractForm with returned value
+- [x] T045 [US2] Implement modal trigger in ContractsOverview: add state for modal open/close, connect "Add New Contract" button to open modal, pass onCreated callback to refresh table
+- [x] T046 [US2] Extend contract service in `frontend/src/components/contracts/AddContractModal.jsx`: implemented inline using fetch API for getNextNumber and createContract
+- [x] T047 [P] [US2] Buyer service implemented inline in AddContractModal: fetch buyers using fetch API, return array of {id, name}
+- [x] T048 [US2] Load buyers in AddContractModal: fetch buyers on modal open via fetch API, populate dropdown, handle loading state
+- [x] T049 [US2] Implement form submission handler in AddContractModal: on Save click, validate form, call fetch API to create contract, on success call onCreated() callback and close modal, on error display backend validation errors
 
 ### Tests for User Story 2 (Playwright E2E)
 

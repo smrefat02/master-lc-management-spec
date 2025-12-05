@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SummaryCard from "../components/contracts/SummaryCard";
 import ContractTable from "../components/contracts/ContractTable";
+import { AddContractModal } from "../components/contracts/AddContractModal";
 import { getContracts } from "../services/contractService";
 
 export default function ContractsOverview() {
@@ -12,6 +13,7 @@ export default function ContractsOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchContracts(currentPage);
@@ -43,6 +45,20 @@ export default function ContractsOverview() {
 
   const handleEditContract = (id) => {
     navigate(`/contracts/${id}/edit`);
+  };
+
+  const handleAddContract = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleContractCreated = (newContract) => {
+    // Refresh the contracts list
+    fetchContracts(1);
+    setCurrentPage(1);
   };
 
   const formatCurrency = (value) => {
@@ -94,12 +110,22 @@ export default function ContractsOverview() {
             <h1 className="text-3xl font-bold text-gray-900">
               Sales Contracts Management
             </h1>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <button
+              onClick={handleAddContract}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
               Add New Contract
             </button>
           </div>
         </div>
       </div>
+
+      {/* Add Contract Modal */}
+      <AddContractModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onCreated={handleContractCreated}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

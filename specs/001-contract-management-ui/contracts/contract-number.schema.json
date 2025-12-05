@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/contract-number.schema.json",
+  "title": "Contract Number Format",
+  "description": "JSON Schema defining the strict format for sales contract numbers in the LC Management System",
+  "type": "string",
+  "pattern": "^IIC\\/AKCL\\/CON\\/\\d{4}\\/\\d{2}$",
+  "minLength": 21,
+  "maxLength": 21,
+  "examples": [
+    "IIC/AKCL/CON/2025/01",
+    "IIC/AKCL/CON/2025/02",
+    "IIC/AKCL/CON/2024/99",
+    "IIC/AKCL/CON/2026/15"
+  ],
+  "counterExamples": [
+    {
+      "value": "IIC/AKCL/CON/25/01",
+      "reason": "Year must be 4 digits, not 2"
+    },
+    {
+      "value": "IIC/AKCL/CON/2025/1",
+      "reason": "Running number must be zero-padded to 2 digits"
+    },
+    {
+      "value": "IIC-AKCL-CON-2025-01",
+      "reason": "Must use forward slashes (/), not hyphens (-)"
+    },
+    {
+      "value": "IIC/AKCL/CON/2025/001",
+      "reason": "Running number must be exactly 2 digits, not 3"
+    },
+    {
+      "value": "IIC/AKCL/CON/2025",
+      "reason": "Missing running number component"
+    },
+    {
+      "value": "AKCL/CON/2025/01",
+      "reason": "Missing IIC prefix"
+    },
+    {
+      "value": "IIC/AKCL/CON/2025/00",
+      "reason": "Running number must start at 01, not 00"
+    },
+    {
+      "value": "iic/akcl/con/2025/01",
+      "reason": "Prefix must be uppercase"
+    }
+  ],
+  "properties": {
+    "prefix": {
+      "description": "Fixed prefix for all contract numbers",
+      "const": "IIC/AKCL/CON",
+      "pattern": "^IIC\\/AKCL\\/CON$"
+    },
+    "year": {
+      "description": "Four-digit year component",
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2099,
+      "pattern": "^\\d{4}$",
+      "examples": [2024, 2025, 2026]
+    },
+    "runningNumber": {
+      "description": "Two-digit zero-padded running number (01-99)",
+      "type": "string",
+      "pattern": "^\\d{2}$",
+      "minLength": 2,
+      "maxLength": 2,
+      "minimum": 1,
+      "maximum": 99,
+      "examples": ["01", "02", "15", "99"]
+    }
+  },
+  "definitions": {
+    "format": {
+      "description": "Contract number format structure",
+      "type": "object",
+      "properties": {
+        "structure": {
+          "const": "IIC/AKCL/CON/YYYY/NN"
+        },
+        "components": {
+          "type": "array",
+          "items": [
+            {
+              "name": "prefix",
+              "value": "IIC/AKCL/CON",
+              "description": "Fixed organizational prefix"
+            },
+            {
+              "name": "year",
+              "value": "YYYY",
+              "description": "Four-digit year (e.g., 2025)"
+            },
+            {
+              "name": "running_number",
+              "value": "NN",
+              "description": "Two-digit zero-padded sequential number (01-99)"
+            }
+          ]
+        }
+      }
+    },
+    "validationRules": {
+      "description": "Validation rules enforced at multiple layers",
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "description": "React form validation rules",
+          "regex": "^IIC\\/AKCL\\/CON\\/\\d{4}\\/\\d{2}$",
+          "liveValidation": true,
+          "errorMessage": "Invalid contract number format. Must match: IIC/AKCL/CON/YYYY/NN"
+        },
+        "backend": {
+          "description": "Laravel validation rules",
+          "rules": [
+            "required",
+            "regex:/^IIC\\/AKCL\\/CON\\/\\d{4}\\/\\d{2}$/",
+            "unique:contracts,contract_no"
+          ]
+        },
+        "database": {
+          "description": "Database-level constraints",
+          "constraints": ["VARCHAR(50)", "NOT NULL", "UNIQUE"]
+        }
+      }
+    },
+    "generationLogic": {
+      "description": "Auto-generation algorithm",
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": [
+            "Extract current year (YYYY) from contract date or system date",
+            "Query database for highest running number (NN) for that year",
+            "If no contracts exist for year, start at 01",
+            "Else, increment highest NN by 1",
+            "Zero-pad to 2 digits (01, 02, ..., 99)",
+            "Construct: IIC/AKCL/CON/{YYYY}/{NN}",
+            "Validate format with regex",
+            "Return generated contract number"
+          ]
+        },
+        "maxContractsPerYear": {
+          "value": 99,
+          "reason": "Running number limited to 2 digits (01-99)"
+        }
+      }
+    }
+  },
+  "usage": {
+    "frontend": {
+      "description": "React form validation with regex pattern",
+      "example": "const CONTRACT_NUMBER_PATTERN = /^IIC\\/AKCL\\/CON\\/\\d{4}\\/\\d{2}$/;"
+    },
+    "backend": {
+      "description": "Laravel validation in StoreContractRequest",
+      "example": "'contract_no' => ['required', 'regex:/^IIC\\/AKCL\\/CON\\/\\d{4}\\/\\d{2}$/', 'unique:contracts,contract_no']"
+    },
+    "database": {
+      "description": "MySQL table definition with UNIQUE constraint",
+      "example": "contract_no VARCHAR(50) NOT NULL UNIQUE"
+    },
+    "playwright": {
+      "description": "E2E test validation",
+      "tests": [
+        "Valid format accepted: IIC/AKCL/CON/2025/01",
+        "Invalid format rejected: IIC-AKCL-CON-2025-01",
+        "Duplicate number rejected by backend",
+        "Auto-generation produces valid format"
+      ]
+    }
+  },
+  "references": {
+    "specification": "specs/001-contract-management-ui/spec.md",
+    "dataModel": "specs/001-contract-management-ui/data-model.md",
+    "apiContract": "specs/001-contract-management-ui/contracts/api-endpoints.yaml",
+    "constitution": ".specify/memory/constitution.md (Principle I: Contract Number Format Enforcement)"
+  }
+}

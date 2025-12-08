@@ -1,4 +1,4 @@
-# Feature Specification: Sales Contract Management UI
+![alt text](image.png)# Feature Specification: Sales Contract Management UI
 
 **Feature Branch**: `001-contract-management-ui`  
 **Created**: 2025-12-04  
@@ -186,6 +186,216 @@ As a contract manager, I need to view detailed information about a contract and 
 - Integration with external systems (ERP, CRM, etc.)
 - Document attachment or file upload for contracts
 
+## UI Design Specifications _(Updated)_
+
+### Layout Structure
+
+**Sidebar Navigation:**
+
+- **Width**: 256px fixed width (`w-64`)
+- **Background**: Light gray (`bg-gray-50`)
+- **Header Section**:
+  - Purple/indigo background (`bg-indigo-600`)
+  - White DS badge with indigo text (10x10 rounded square)
+  - Company name "DIMENSIONS" in bold white text
+  - "GROUP" subtitle in lighter indigo-100
+- **Search Input**:
+  - White background with gray border (`border-gray-200`)
+  - Gray placeholder text
+  - Search icon on left side
+  - Rounded corners (`rounded-md`)
+- **Navigation Items**:
+  - APP section header in bold indigo-600 uppercase
+  - Menu items: Sales Contract, Orders, Shipments, B2B-LC, Buyers
+  - Text color: indigo-600
+  - Active state: `bg-indigo-50` with `text-indigo-700`
+  - Hover state: `bg-indigo-50/50`
+  - Icons with 5x5 size matching menu item
+- **Overview Section**:
+  - Same styling as APP section
+  - Overview menu item with grid icon
+- **Dark Mode Toggle**:
+  - Bottom of sidebar with gray-200 border on top
+  - Moon icon with "Toggle Dark Mode" text
+  - Indigo-600 text color
+
+**Top Header Bar:**
+
+- **Background**: White with bottom border (`border-gray-200`)
+- **Left Side**: "LC Management" title in bold gray-900, text-2xl
+- **Right Side**: User info section with:
+  - User name "S.M. Refat" in bold gray-900, text-sm
+  - "Viewer" badge: indigo-50 background, indigo-700 text, indigo-200 border, rounded-full, text-xs
+  - Avatar button: 9x9 circular, gray-800 background, user icon in white
+  - All elements aligned horizontally with gap-3
+
+**Page Content Area:**
+
+- **Background**: Light gray (`bg-gray-50`)
+- **Page Header**:
+  - White background with bottom border
+  - "Sales Contracts Overview" title (text-2xl, bold, gray-900)
+  - Description text below in gray-600, text-sm
+  - "Add New Contract" button on right: indigo-600 background, white text, with plus icon
+
+### Modal Design (Add New Contract)
+
+**Modal Overlay:**
+
+- Semi-transparent backdrop: `bg-black/20` with `backdrop-blur-sm`
+- Shows background content with blur effect
+
+**Modal Dialog:**
+
+- **Background**: White
+- **Border Radius**: `rounded-lg`
+- **Max Width**: 2xl (672px)
+- **Shadow**: `shadow-xl`
+
+**Modal Header:**
+
+- **Layout**: Icon + title + close button
+- **Icon**: Indigo-100 background, indigo-600 document icon (10x10 container)
+- **Title**: "Add New Contract" in semibold gray-900, text-lg
+- **Close Button**: Gray-400 X icon that turns gray-600 on hover
+- **Border**: Bottom border in gray-200
+
+**Modal Content:**
+
+- **Padding**: px-6 py-4
+- **Form Layout**: Two-column grid (`grid-cols-2 gap-4`)
+- **Form Fields**:
+  - Buyer (dropdown) - left column
+  - Contract No (text input) - right column
+  - Contract Date (date input) - left column
+  - Amendment Date (date input) - right column
+  - Total Orders (number input) - left column
+  - Order Quantity (number input) - right column
+  - Total Contract Value USD (number input) - left column
+  - Overall B2B % (number input) - right column
+  - Status (dropdown) - full width
+  - Remarks (textarea) - full width
+
+**Input Styling:**
+
+- Border: `border-gray-300` with `rounded-md`
+- Focus state: `border-indigo-500` with `ring-1 ring-indigo-500`
+- Text size: text-sm
+- Padding: px-3 py-2
+- Placeholders for numeric fields (e.g., "0", "0.00")
+
+**Modal Footer:**
+
+- **Border**: Top border gray-200
+- **Buttons**: Right-aligned with gap-3
+- **Cancel Button**: White background, gray-700 text, gray-300 border, rounded-md
+- **Save Button**: Indigo-600 background, white text, rounded-md, hover:indigo-700
+
+### Summary Cards
+
+**Card Container:**
+
+- **Background**: White with colored accents
+- **Border Radius**: `rounded-xl`
+- **Shadow**: `shadow-sm`
+- **Padding**: p-6
+
+**Card Colors (by metric):**
+
+- Total Contracts: Blue theme (`bg-blue-50`, `text-blue-700`)
+- Total LC Value: Green theme (`bg-green-50`, `text-green-700`)
+- Total Order Quantity: Purple theme (`bg-purple-50`, `text-purple-700`)
+- Average B2B: Orange theme (`bg-orange-50`, `text-orange-700`)
+
+**Card Layout:**
+
+- Icon on left (colored circle with ring-2)
+- Title above value
+- Large value text (text-3xl, font-bold)
+- Description text below in smaller gray font
+
+### Table Design
+
+**Table Header:**
+
+- **Background**: Dark gray (`bg-[#2d3748]`)
+- **Text**: White, font-bold
+- **Columns**: Buyer Name, Sales Contract, Amendment Date, Total Orders, Order Quantity, Master LC Value, B2B (%), Status, Action
+
+**Table Rows:**
+
+- **Background**: White with hover state
+- **Border**: Gray-200 border between rows
+- **Text**: Gray-900 for main content, gray-600 for secondary
+
+**Status Badges:**
+
+- Draft: Gray background (`bg-gray-100`, `text-gray-700`)
+- Active: Green background (`bg-green-100`, `text-green-700`)
+- Approved: Blue background (`bg-blue-100`, `text-blue-700`)
+- Pending: Yellow background (`bg-yellow-100`, `text-yellow-700`)
+- All badges: `px-3 py-1 rounded-md font-semibold` with border
+
+**Action Buttons:**
+
+- Show/Edit: Indigo-600 text links that turn indigo-900 on hover
+- Separated by vertical bar in gray-300
+
+**Pagination:**
+
+- Simple "Prev/Next" buttons
+- Current page indicator in center
+- Gray-300 borders and text
+
+### Color Palette
+
+**Primary Colors:**
+
+- Indigo-600: `#4f46e5` (primary buttons, active states)
+- Indigo-700: `#4338ca` (text, darker elements)
+- Indigo-50: `#eef2ff` (light backgrounds)
+
+**Neutral Colors:**
+
+- Gray-50: `#f9fafb` (page background)
+- Gray-200: `#e5e7eb` (borders)
+- Gray-600: `#4b5563` (secondary text)
+- Gray-900: `#111827` (primary text)
+
+**Status Colors:**
+
+- Blue: `#3b82f6` (approved, info)
+- Green: `#10b981` (active, success)
+- Yellow: `#f59e0b` (pending, warning)
+- Orange: `#f97316` (metrics)
+- Purple: `#a855f7` (metrics)
+
+### Typography
+
+**Font Family**: System font stack (default Tailwind)
+
+**Font Sizes:**
+
+- text-xs: 0.75rem (12px) - badges, small labels
+- text-sm: 0.875rem (14px) - body text, form inputs
+- text-base: 1rem (16px) - default text
+- text-lg: 1.125rem (18px) - modal titles
+- text-2xl: 1.5rem (24px) - page headers
+- text-3xl: 1.875rem (30px) - metric values
+
+**Font Weights:**
+
+- font-medium: 500 - form labels
+- font-semibold: 600 - names, titles
+- font-bold: 700 - headers, section titles
+
+### Spacing & Layout
+
+**Container Padding**: px-8 (32px horizontal)
+**Component Gaps**: gap-3 to gap-6 (12px to 24px)
+**Form Field Spacing**: space-y-5 (20px vertical)
+**Border Radius**: rounded-md (6px) for inputs, rounded-lg (8px) for cards
+
 ## Assumptions
 
 - The system already has a Buyer table/entity with existing buyer records that can be loaded into the dropdown
@@ -196,15 +406,17 @@ As a contract manager, I need to view detailed information about a contract and 
 - If no contracts exist for a given year, the first number will be 01 (e.g., IIC/AKCL/CON/2025/01)
 - Amendment Date can be equal to or later than Contract Date; the frontend will provide basic date validation
 - B2B percentage is a whole number or decimal between 0 and 100 (inclusive)
-- Status values are predefined in the backend (e.g., "Draft", "Active", "Pending", "Completed", "Cancelled")
+- Status values are predefined in the backend (e.g., "Draft", "Active", "Approved", "Pending", "Completed", "Cancelled")
 - Currency for Total Contract Value is always USD (no currency conversion needed)
 - The system uses a modern browser with JavaScript enabled (Chrome, Firefox, Safari, Edge)
 - API responses return JSON format
 - The React frontend uses functional components with hooks (not class components)
-- Tailwind CSS is already configured in the React project
-- Laravel version is 9.x or higher with built-in validation support
+- Tailwind CSS v4 is configured in the React project
+- Laravel version is 12.x with built-in validation support
 - Playwright tests run in a dedicated test environment with a seeded database
 - Network latency for API calls is within normal range (< 500ms for most requests)
 - The database can handle up to 10,000 contracts without significant performance degradation (pagination helps with this)
 - Toast notifications are implemented using an existing notification library or custom component
 - The "Show" and "Edit" actions in the table are placeholder buttons for future functionality (initially non-functional or showing "Coming Soon" message)
+- Layout component wraps all pages with persistent sidebar navigation
+- Modal backdrop blur effect is supported by modern browsers

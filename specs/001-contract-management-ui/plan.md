@@ -19,7 +19,7 @@ Build a full-stack sales contract management system with React frontend, Laravel
 **Primary Dependencies**:
 
 - Frontend: React 18+, Tailwind CSS 3+, Axios (HTTP client), React Hook Form or native state management
-- Backend: Laravel 9.x/10.x, Laravel Sanctum (CORS/API tokens), MySQL/PostgreSQL driver
+- Backend: Laravel 9.x/10.x, Laravel Sanctum (CORS/API tokens), L5-Swagger (darkaonline/l5-swagger) for OpenAPI documentation, MySQL/PostgreSQL driver
 - Testing: Playwright for E2E testing, Laravel's built-in testing tools (PHPUnit)
 
 **Storage**:
@@ -283,9 +283,15 @@ Based on Technical Context, the following areas require research to ensure best 
    - Output: Document recommended test structure and fixture patterns
 
 6. **Laravel CORS and Sanctum Configuration**
+
    - Task: Research Laravel Sanctum setup for SPA authentication and CORS configuration
    - Focus: Token-based auth vs. cookie-based, CORS headers for local development
    - Output: Document configuration steps for frontend-backend communication
+
+7. **OpenAPI/Swagger API Documentation**
+   - Task: Research L5-Swagger setup and OpenAPI 3.0 annotation patterns for Laravel
+   - Focus: `@OA\` annotation syntax, schema definitions, request/response examples, Swagger UI configuration
+   - Output: Document annotation patterns for controllers and models, setup steps for `/api/documentation` endpoint
 
 ### Research Output Location
 

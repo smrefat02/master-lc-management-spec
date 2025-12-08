@@ -22,15 +22,17 @@ export default function EditContractModal({
 
   const fetchBuyers = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/buyers");
+      const response = await fetch("http://127.0.0.1:8000/api/buyers");
       if (!response.ok) {
         throw new Error("Failed to fetch buyers");
       }
       const data = await response.json();
-      setBuyers(data.buyers || []);
+      // API returns array directly, not wrapped in {buyers: [...]}
+      setBuyers(Array.isArray(data) ? data : []);
+      console.log("✅ Loaded buyers:", data.length);
     } catch (err) {
       setError("Failed to load buyers. Please try again.");
-      console.error("Error fetching buyers:", err);
+      console.error("❌ Error fetching buyers:", err);
     }
   };
 
@@ -41,7 +43,7 @@ export default function EditContractModal({
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/contracts/${contract.id}`,
+        `http://127.0.0.1:8000/api/contracts/${contract.id}`,
         {
           method: "PUT",
           headers: {
@@ -107,7 +109,7 @@ export default function EditContractModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -121,31 +123,41 @@ export default function EditContractModal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-2xl font-semibold leading-6 text-gray-900"
-                  >
-                    Edit Contract
-                  </Dialog.Title>
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-semibold text-gray-900"
+                    >
+                      Edit Contract
+                    </Dialog.Title>
+                  </div>
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
-                {error && (
-                  <div className="mb-4 rounded-md bg-red-50 p-4">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="h-5 w-5 text-red-400"
-                          viewBox="0 0 20 20"
+                <div className="px-6 py-4">
+
+                  {error && (
+                    <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg
+                            className="h-5 w-5 text-red-400"
+                            viewBox="0 0 20 20"
                           fill="currentColor"
                         >
                           <path
@@ -162,17 +174,18 @@ export default function EditContractModal({
                       </div>
                     </div>
                   </div>
-                )}
+                  )}
 
-                <ContractForm
-                  buyers={buyers}
-                  onSubmit={handleSubmit}
-                  onCancel={onClose}
-                  isLoading={isLoading}
-                  validationErrors={validationErrors}
-                  defaultValues={defaultValues}
-                  mode="edit"
-                />
+                  <ContractForm
+                    buyers={buyers}
+                    onSubmit={handleSubmit}
+                    onCancel={onClose}
+                    isLoading={isLoading}
+                    validationErrors={validationErrors}
+                    defaultValues={defaultValues}
+                    mode="edit"
+                  />
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

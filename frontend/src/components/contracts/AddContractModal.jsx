@@ -28,15 +28,9 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
       // Fetch next contract number and buyers in parallel
       const [contractNoRes, buyersRes] = await Promise.all([
         fetch(
-          `${
-            import.meta.env.VITE_API_URL || "http://localhost:8000"
-          }/api/contracts/next-number?year=${currentYear}`
+          `http://127.0.0.1:8000/api/contracts/next-number?year=${currentYear}`
         ),
-        fetch(
-          `${
-            import.meta.env.VITE_API_URL || "http://localhost:8000"
-          }/api/buyers`
-        ),
+        fetch(`http://127.0.0.1:8000/api/buyers`),
       ]);
 
       if (!contractNoRes.ok || !buyersRes.ok) {
@@ -46,10 +40,18 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
       const contractNoData = await contractNoRes.json();
       const buyersData = await buyersRes.json();
 
+      console.log("✅ Contract number:", contractNoData.contract_no);
+      console.log(
+        "✅ Buyers loaded:",
+        Array.isArray(buyersData) ? buyersData.length : 0
+      );
+
       setInitialContractNo(contractNoData.contract_no);
-      setBuyers(buyersData.buyers || buyersData);
+      // API returns array directly, not wrapped in {buyers: [...]}
+      setBuyers(Array.isArray(buyersData) ? buyersData : []);
     } catch (err) {
-      console.error("Failed to fetch initial data:", err);
+      console.error("❌ Failed to fetch initial data:", err);
+      console.error("❌ Error details:", err.message);
       setError("Failed to load form data. Please try again.");
     } finally {
       setIsLoading(false);
@@ -61,18 +63,13 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL || "http://localhost:8000"
-        }/api/contracts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`http://127.0.0.1:8000/api/contracts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -123,7 +120,7 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -137,54 +134,86 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    Add New Contract
-                  </Dialog.Title>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-indigo-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    </div>
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-semibold text-gray-900"
+                    >
+                      Add New Contract
+                    </Dialog.Title>
+                  </div>
                   <button
                     type="button"
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                     onClick={handleClose}
                     disabled={isSubmitting}
                   >
                     <span className="sr-only">Close</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
-                {/* Error Message */}
-                {error && (
-                  <div className="mb-4 rounded-md bg-red-50 p-4">
-                    <div className="flex">
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-800">
-                          {error}
-                        </h3>
+                <div className="px-6 py-4">
+                  {/* Error Message */}
+                  {error && (
+                    <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg
+                            className="h-5 w-5 text-red-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">
+                            {error}
+                          </h3>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Loading State */}
-                {isLoading ? (
-                  <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : (
-                  /* Contract Form */
-                  <ContractForm
-                    initialContractNo={initialContractNo}
-                    buyers={buyers}
-                    onSubmit={handleSubmit}
-                    onCancel={handleClose}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
+                  {/* Loading State */}
+                  {isLoading ? (
+                    <div className="flex justify-center items-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                    </div>
+                  ) : (
+                    /* Contract Form */
+                    <ContractForm
+                      initialContractNo={initialContractNo}
+                      buyers={buyers}
+                      onSubmit={handleSubmit}
+                      onCancel={handleClose}
+                      isSubmitting={isSubmitting}
+                    />
+                  )}
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

@@ -64,7 +64,7 @@ export default function ViewContractModal({ isOpen, onClose, contract }) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -78,167 +78,194 @@ export default function ViewContractModal({ isOpen, onClose, contract }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-2xl font-semibold leading-6 text-gray-900"
-                  >
-                    Contract Details
-                  </Dialog.Title>
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-indigo-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    </div>
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-semibold text-gray-900"
+                    >
+                      Contract Details
+                    </Dialog.Title>
+                  </div>
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
-                <div className="space-y-6">
-                  {/* Contract Information */}
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Contract No
-                      </label>
-                      <div className="mt-1 text-base text-gray-900 font-mono">
-                        {contract.contract_no}
+                <div className="px-6 py-4">
+                  <div className="space-y-6">
+                    {/* Contract Information */}
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Contract No
+                        </label>
+                        <div className="mt-1 text-base text-gray-900 font-mono">
+                          {contract.contract_no}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Status
+                        </label>
+                        <div className="mt-1">
+                          {getStatusBadge(contract.status)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Buyer
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {contract.buyer?.name || "N/A"}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Contract Date
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {formatDate(contract.contract_date)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Amendment Date
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {formatDate(contract.amendment_date)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Total Orders
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {formatNumber(contract.total_orders)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Order Quantity
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {formatNumber(contract.order_quantity)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Value (USD)
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {formatCurrency(contract.value_usd)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          B2B Percentage
+                        </label>
+                        <div className="mt-1 text-base text-gray-900">
+                          {contract.b2b_percent}%
+                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Status
-                      </label>
-                      <div className="mt-1">
-                        {getStatusBadge(contract.status)}
+                    {/* Remarks */}
+                    {contract.remarks && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Remarks
+                        </label>
+                        <div className="mt-1 text-base text-gray-900 whitespace-pre-wrap">
+                          {contract.remarks}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Buyer
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {contract.buyer?.name || "N/A"}
+                    {/* Contact Information */}
+                    {contract.buyer && (
+                      <div className="border-t pt-6">
+                        <h4 className="text-lg font-medium text-gray-900 mb-4">
+                          Buyer Contact Information
+                        </h4>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          {contract.buyer.contact_email && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Email
+                              </label>
+                              <div className="mt-1 text-base text-gray-900">
+                                {contract.buyer.contact_email}
+                              </div>
+                            </div>
+                          )}
+                          {contract.buyer.contact_phone && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Phone
+                              </label>
+                              <div className="mt-1 text-base text-gray-900">
+                                {contract.buyer.contact_phone}
+                              </div>
+                            </div>
+                          )}
+                          {contract.buyer.address && (
+                            <div className="sm:col-span-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Address
+                              </label>
+                              <div className="mt-1 text-base text-gray-900">
+                                {contract.buyer.address}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Contract Date
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {formatDate(contract.contract_date)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Amendment Date
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {formatDate(contract.amendment_date)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Total Orders
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {formatNumber(contract.total_orders)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Order Quantity
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {formatNumber(contract.order_quantity)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Value (USD)
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {formatCurrency(contract.value_usd)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        B2B Percentage
-                      </label>
-                      <div className="mt-1 text-base text-gray-900">
-                        {contract.b2b_percent}%
-                      </div>
-                    </div>
+                    )}
                   </div>
-
-                  {/* Remarks */}
-                  {contract.remarks && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Remarks
-                      </label>
-                      <div className="mt-1 text-base text-gray-900 whitespace-pre-wrap">
-                        {contract.remarks}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Contact Information */}
-                  {contract.buyer && (
-                    <div className="border-t pt-6">
-                      <h4 className="text-lg font-medium text-gray-900 mb-4">
-                        Buyer Contact Information
-                      </h4>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        {contract.buyer.contact_email && (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                              Email
-                            </label>
-                            <div className="mt-1 text-base text-gray-900">
-                              {contract.buyer.contact_email}
-                            </div>
-                          </div>
-                        )}
-                        {contract.buyer.contact_phone && (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                              Phone
-                            </label>
-                            <div className="mt-1 text-base text-gray-900">
-                              {contract.buyer.contact_phone}
-                            </div>
-                          </div>
-                        )}
-                        {contract.buyer.address && (
-                          <div className="sm:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Address
-                            </label>
-                            <div className="mt-1 text-base text-gray-900">
-                              {contract.buyer.address}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                <div className="mt-6 flex justify-end">
+                {/* Modal Footer */}
+                <div className="flex justify-end px-6 py-4 border-t border-gray-200">
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                     onClick={onClose}
                   >
                     Close

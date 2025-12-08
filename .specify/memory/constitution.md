@@ -1,15 +1,15 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.0.0 → 1.1.0
-Change Type: MINOR - Added Interactive UI & Modal Management Principles
-Date: 2025-12-05
+Version Change: 1.1.0 → 1.2.0
+Change Type: MINOR - Added API Documentation (OpenAPI/Swagger) Principle
+Date: 2025-12-08
 
 Principles Modified:
-- Added VI. Interactive UI Elements (NEW)
-- Added VII. Modal Management & State (NEW)
-- Strengthened CRUD requirements in Technical Standards
-- Updated Required Features to reflect completed implementation
+- Added VIII. API Documentation (OpenAPI/Swagger) (NEW)
+- Updated Technology Stack to include L5-Swagger
+- Enhanced API Endpoints requirements with documentation mandate
+- Updated Constitution Compliance Checklist
 
 Principles Defined:
 - I. Contract Number Format Enforcement (STRICT)
@@ -17,16 +17,24 @@ Principles Defined:
 - III. Component Modularity
 - IV. End-to-End Testing (Playwright)
 - V. Clean Architecture & Maintainability
-- VI. Interactive UI Elements (NEW)
-- VII. Modal Management & State (NEW)
+- VI. Interactive UI Elements
+- VII. Modal Management & State
+- VIII. API Documentation (OpenAPI/Swagger) (NEW)
+
+Implementation Status:
+✅ darkaonline/l5-swagger ^8.6 installed
+✅ All controllers annotated with @OA\ documentation
+✅ Swagger UI accessible at /api/documentation
+✅ Complete OpenAPI 3.0 schemas for Contract, Buyer, Pagination, Summary
+✅ All 6 endpoints fully documented (GET/POST/PUT contracts, GET buyers)
 
 Templates Status:
-✅ plan-template.md - Aligned (constitution check present)
-✅ spec-template.md - Aligned (user stories & acceptance criteria structure)
-✅ tasks-template.md - Aligned (organized by user story, test tasks included)
-✅ All runtime fixes documented (API routes, CORS, imports)
+✅ plan-template.md - Aligned
+✅ spec-template.md - Aligned
+✅ tasks-template.md - Aligned
+✅ All runtime fixes documented
 
-Follow-up TODOs: None - All placeholders resolved
+Follow-up TODOs: None
 -->
 
 # LC Management System Constitution
@@ -132,12 +140,39 @@ Follow-up TODOs: None - All placeholders resolved
 
 **Rationale**: Proper modal management prevents state bugs, memory leaks, and UI glitches. Clear lifecycle management ensures predictable behavior and maintainability. Supporting both create and edit modes in a single form component reduces code duplication.
 
+### VIII. API Documentation (OpenAPI/Swagger)
+
+**ALL backend API endpoints MUST be documented using OpenAPI 3.0 annotations:**
+
+- Every controller method MUST include complete `@OA\` annotations with:
+  - Operation summary and description
+  - All parameters (path, query, body) with types, validation rules, and examples
+  - Request body schemas for POST/PUT endpoints
+  - Response schemas for all status codes (200, 201, 400, 404, 422, 500)
+  - Tags for logical grouping of endpoints
+- Schema definitions MUST be defined once and reused via `$ref` references
+- Swagger UI MUST be accessible at `/api/documentation` for live API testing
+- Documentation MUST be regenerated via `php artisan l5-swagger:generate` after any API changes
+- All validation rules, formats, and constraints MUST be reflected in OpenAPI schemas
+
+**Required Annotations:**
+
+- **Controller**: `@OA\Info` with API title, version, description, contact
+- **Routes**: `@OA\Server` definitions for development/production
+- **Models**: `@OA\Schema` for all data transfer objects (Contract, Buyer, Pagination, Summary)
+- **Endpoints**: `@OA\Get`, `@OA\Post`, `@OA\Put`, `@OA\Delete` with complete metadata
+- **Validation**: `@OA\Property` with type, format, pattern, minimum, maximum, enum, required
+- **Errors**: `@OA\Response` for ValidationError (422) and ErrorResponse (404, 500)
+
+**Rationale**: OpenAPI documentation serves as the single source of truth for API contracts. It enables frontend developers to understand API behavior without reading backend code, supports automated client generation, facilitates API testing via Swagger UI, and prevents API breaking changes by making contracts explicit. Complete, accurate documentation reduces integration bugs and accelerates development velocity.
+
 ## Technical Standards
 
 ### Technology Stack
 
 - **Frontend**: React 18+ with Vite, Tailwind CSS v4, Axios for API calls
 - **Backend**: Laravel 12 with RESTful API design and resource controllers
+- **API Documentation**: L5-Swagger (darkaonline/l5-swagger) for OpenAPI 3.0 documentation
 - **Testing**: Playwright for end-to-end tests, PHPUnit for backend tests
 - **Database**: MySQL/MariaDB with foreign keys and constraints
 
@@ -161,6 +196,8 @@ Follow-up TODOs: None - All placeholders resolved
 - Include validation errors in consistent format
 - Support CORS for frontend access
 - Return JSON responses with appropriate headers
+- Be fully documented with OpenAPI 3.0 annotations
+- Be testable via Swagger UI at `/api/documentation`
 
 ### Required React Components
 
@@ -249,6 +286,8 @@ Before completing any feature:
 
 - [ ] Contract number validation enforced at frontend, backend, and database layers
 - [ ] All API endpoints include input validation and return proper error messages
+- [ ] All API endpoints documented with complete OpenAPI 3.0 annotations
+- [ ] Swagger UI accessible at `/api/documentation` with working examples
 - [ ] Components are modular, single-purpose, and reusable
 - [ ] Playwright tests cover layout, validation, and functional workflows
 - [ ] Code follows clean architecture principles and uses Tailwind CSS consistently
@@ -284,7 +323,7 @@ This constitution supersedes all other development practices and guidelines. All
 - Implementation plans: `.specify/templates/plan-template.md`
 - Task lists: `.specify/templates/tasks-template.md`
 
-**Version**: 1.1.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-05
+**Version**: 1.2.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-08
 
 ---
 

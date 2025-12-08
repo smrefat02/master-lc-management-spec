@@ -1,0 +1,732 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "LC Management API",
+        "description": "Sales Contracts Management System API - Manage contracts, buyers, and contract number generation",
+        "contact": {
+            "name": "API Support",
+            "email": "support@lcmanagement.example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Development Server"
+        },
+        {
+            "url": "http://localhost:8000",
+            "description": "Local Development Server (Alternative)"
+        }
+    ],
+    "paths": {
+        "/api/buyers": {
+            "get": {
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Get list of buyers",
+                "description": "Returns a list of all buyers (id and name only) sorted alphabetically. Used for dropdown selections.",
+                "operationId": "getBuyersList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Buyer"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/contracts": {
+            "get": {
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Get list of contracts",
+                "description": "Returns paginated list of contracts with summary statistics. Supports search by buyer name/contract number and filter by status.",
+                "operationId": "getContractsList",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by buyer name or contract number",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255,
+                            "example": "Pfannerstill"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by contract status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "active",
+                                "pending",
+                                "completed",
+                                "cancelled"
+                            ],
+                            "example": "active"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "contracts": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Contract"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/Pagination"
+                                        },
+                                        "summary": {
+                                            "$ref": "#/components/schemas/Summary"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Create a new contract",
+                "description": "Creates a new contract with validation. Contract number must be unique and follow format IIC/AKCL/CON/YYYY/NN",
+                "operationId": "createContract",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "buyer_id",
+                                    "contract_no",
+                                    "contract_date",
+                                    "total_orders",
+                                    "order_quantity",
+                                    "value_usd",
+                                    "b2b_percent",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "buyer_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "contract_no": {
+                                        "type": "string",
+                                        "pattern": "^IIC/AKCL/CON/\\d{4}/\\d{2}$",
+                                        "example": "IIC/AKCL/CON/2025/29"
+                                    },
+                                    "contract_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-08"
+                                    },
+                                    "amendment_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-15",
+                                        "nullable": true
+                                    },
+                                    "total_orders": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 10
+                                    },
+                                    "order_quantity": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 34216
+                                    },
+                                    "value_usd": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "minimum": 0,
+                                        "example": 225803.23
+                                    },
+                                    "b2b_percent": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "maximum": 100,
+                                        "minimum": 0,
+                                        "example": 18.22
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "pending",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "remarks": {
+                                        "type": "string",
+                                        "example": "New contract for Q1 2025",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Contract created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contract created successfully"
+                                        },
+                                        "contract": {
+                                            "$ref": "#/components/schemas/Contract"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or duplicate contract number",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/contracts/{id}": {
+            "get": {
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Get contract by ID",
+                "description": "Returns a single contract with buyer details",
+                "operationId": "getContractById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Contract ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "contract": {
+                                            "$ref": "#/components/schemas/Contract"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contract not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Update an existing contract",
+                "description": "Updates an existing contract. Contract number cannot be changed after creation.",
+                "operationId": "updateContract",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Contract ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "buyer_id",
+                                    "contract_date",
+                                    "total_orders",
+                                    "order_quantity",
+                                    "value_usd",
+                                    "b2b_percent",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "buyer_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "contract_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-08"
+                                    },
+                                    "amendment_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-15",
+                                        "nullable": true
+                                    },
+                                    "total_orders": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 15
+                                    },
+                                    "order_quantity": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 50000
+                                    },
+                                    "value_usd": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "minimum": 0,
+                                        "example": 350000
+                                    },
+                                    "b2b_percent": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "maximum": 100,
+                                        "minimum": 0,
+                                        "example": 25.5
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "pending",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "active"
+                                    },
+                                    "remarks": {
+                                        "type": "string",
+                                        "example": "Updated contract terms",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contract updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contract updated successfully"
+                                        },
+                                        "contract": {
+                                            "$ref": "#/components/schemas/Contract"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contract not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to update contract"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/contracts/next-number": {
+            "get": {
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Get next contract number",
+                "description": "Generates the next available contract number for a given year in format IIC/AKCL/CON/YYYY/NN",
+                "operationId": "getNextContractNumber",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "Year for contract number generation (4 digits, 2000-2100)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 2100,
+                            "minimum": 2000,
+                            "example": 2025
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "contract_no": {
+                                            "type": "string",
+                                            "example": "IIC/AKCL/CON/2025/29"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to generate contract number"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Buyer": {
+                "title": "Buyer",
+                "description": "Buyer model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Pfannerstill PLC"
+                    }
+                },
+                "type": "object"
+            },
+            "Contract": {
+                "title": "Contract",
+                "description": "Contract model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "buyer_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "contract_no": {
+                        "type": "string",
+                        "pattern": "^IIC/AKCL/CON/\\d{4}/\\d{2}$",
+                        "example": "IIC/AKCL/CON/2025/01"
+                    },
+                    "contract_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-01-15"
+                    },
+                    "amendment_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-02-20",
+                        "nullable": true
+                    },
+                    "total_orders": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "order_quantity": {
+                        "type": "integer",
+                        "example": 34216
+                    },
+                    "value_usd": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 225803.23
+                    },
+                    "b2b_percent": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 18.22
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "pending",
+                            "completed",
+                            "cancelled"
+                        ],
+                        "example": "active"
+                    },
+                    "remarks": {
+                        "type": "string",
+                        "example": "Sample contract remarks",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-02-20T14:45:00Z"
+                    },
+                    "buyer": {
+                        "$ref": "#/components/schemas/Buyer"
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "title": "Pagination",
+                "description": "Pagination metadata",
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 30
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "Summary": {
+                "title": "Summary",
+                "description": "Contract summary statistics",
+                "properties": {
+                    "total_contracts": {
+                        "type": "integer",
+                        "example": 30
+                    },
+                    "total_value_usd": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 6500000.5
+                    },
+                    "total_order_quantity": {
+                        "type": "integer",
+                        "example": 1250000
+                    },
+                    "avg_b2b_percent": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 22.45
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "title": "Validation Error",
+                "description": "Validation error response",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "The contract no field is required."
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "title": "Error Response",
+                "description": "Generic error response",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Resource not found"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Contracts",
+            "description": "Contract management endpoints"
+        },
+        {
+            "name": "Buyers",
+            "description": "Buyer information endpoints"
+        }
+    ]
+}

@@ -83,7 +83,7 @@ class StoreContractRequest extends FormRequest
             'status' => [
                 'required',
                 'string',
-                'in:draft,active,pending,completed,cancelled',
+                'in:draft,active,approved,pending,completed,cancelled',
             ],
             
             // Remarks (optional)

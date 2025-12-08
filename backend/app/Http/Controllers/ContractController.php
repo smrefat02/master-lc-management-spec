@@ -17,7 +17,62 @@ class ContractController extends Controller
     {
         $this->contractNumberService = $contractNumberService;
     }
+
     /**
+     * @OA\Get(
+     *     path="/api/contracts",
+     *     operationId="getContractsList",
+     *     tags={"Contracts"},
+     *     summary="Get list of contracts",
+     *     description="Returns paginated list of contracts with summary statistics. Supports search by buyer name/contract number and filter by status.",
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (max 100)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=100, example=15)
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by buyer name or contract number",
+     *         required=false,
+     *         @OA\Schema(type="string", maxLength=255, example="Pfannerstill")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by contract status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"draft", "active", "approved", "pending", "completed", "cancelled"}, example="active")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="contracts",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Contract")
+     *             ),
+     *             @OA\Property(property="pagination", ref="#/components/schemas/Pagination"),
+     *             @OA\Property(property="summary", ref="#/components/schemas/Summary")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     )
+     * )
+     *
      * Display a paginated list of contracts with summary statistics.
      * Supports search and filter parameters.
      */
@@ -28,7 +83,7 @@ class ContractController extends Controller
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
             'search' => 'nullable|string|max:255',
-            'status' => 'nullable|string|in:draft,active,pending,completed,cancelled',
+            'status' => 'nullable|string|in:draft,active,approved,pending,completed,cancelled',
         ]);
 
         $perPage = $request->input('per_page', 15);
@@ -69,6 +124,33 @@ class ContractController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/contracts/{id}",
+     *     operationId="getContractById",
+     *     tags={"Contracts"},
+     *     summary="Get contract by ID",
+     *     description="Returns a single contract with buyer details",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Contract ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="contract", ref="#/components/schemas/Contract")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Contract not found",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
+     *
      * Display a single contract with buyer details.
      */
     public function show($id)
@@ -87,6 +169,41 @@ class ContractController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/contracts/next-number",
+     *     operationId="getNextContractNumber",
+     *     tags={"Contracts"},
+     *     summary="Get next contract number",
+     *     description="Generates the next available contract number for a given year in format IIC/AKCL/CON/YYYY/NN",
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="query",
+     *         description="Year for contract number generation (4 digits, 2000-2100)",
+     *         required=true,
+     *         @OA\Schema(type="integer", minimum=2000, maximum=2100, example=2025)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="contract_no", type="string", example="IIC/AKCL/CON/2025/29")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Failed to generate contract number"),
+     *             @OA\Property(property="error", type="string", example="Error details")
+     *         )
+     *     )
+     * )
+     *
      * Get the next available contract number for a given year.
      */
     public function nextNumber(Request $request)
@@ -111,6 +228,43 @@ class ContractController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/contracts",
+     *     operationId="createContract",
+     *     tags={"Contracts"},
+     *     summary="Create a new contract",
+     *     description="Creates a new contract with validation. Contract number must be unique and follow format IIC/AKCL/CON/YYYY/NN",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"buyer_id", "contract_no", "contract_date", "total_orders", "order_quantity", "value_usd", "b2b_percent", "status"},
+     *             @OA\Property(property="buyer_id", type="integer", example=3),
+     *             @OA\Property(property="contract_no", type="string", pattern="^IIC/AKCL/CON/\d{4}/\d{2}$", example="IIC/AKCL/CON/2025/29"),
+     *             @OA\Property(property="contract_date", type="string", format="date", example="2025-12-08"),
+     *             @OA\Property(property="amendment_date", type="string", format="date", nullable=true, example="2025-12-15"),
+     *             @OA\Property(property="total_orders", type="integer", minimum=0, example=10),
+     *             @OA\Property(property="order_quantity", type="integer", minimum=0, example=34216),
+     *             @OA\Property(property="value_usd", type="number", format="decimal", minimum=0, example=225803.23),
+     *             @OA\Property(property="b2b_percent", type="number", format="decimal", minimum=0, maximum=100, example=18.22),
+     *             @OA\Property(property="status", type="string", enum={"draft", "active", "pending", "completed", "cancelled"}, example="draft"),
+     *             @OA\Property(property="remarks", type="string", nullable=true, example="New contract for Q1 2025")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Contract created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Contract created successfully"),
+     *             @OA\Property(property="contract", ref="#/components/schemas/Contract")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error or duplicate contract number",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     )
+     * )
+     *
      * Store a newly created contract.
      */
     public function store(StoreContractRequest $request)

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 /**
  * @OA\Info(
  *     title="LC Management API",
- *     version="1.1.0",
- *     description="LC Management System API - Complete system for managing contracts, buyers, and orders with cost tracking. Includes contract management, order processing, cost analysis, and comprehensive reporting capabilities.",
+ *     version="1.2.0",
+ *     description="LC Management System API - Complete system for managing contracts, buyers, orders, and shipments. Includes contract management, order processing with cost tracking, shipment tracking with summary statistics, and comprehensive reporting capabilities.",
  *     @OA\Contact(
  *         name="API Support",
  *         email="support@lcmanagement.example.com"
@@ -36,6 +36,11 @@ namespace App\Http\Controllers;
  * @OA\Tag(
  *     name="Orders",
  *     description="Order management endpoints - Create, read, update, and delete orders with cost tracking"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Shipments",
+ *     description="Shipment management endpoints - Track shipments against contracts and orders with summary statistics"
  * )
  * 
  * @OA\Schema(
@@ -184,6 +189,36 @@ namespace App\Http\Controllers;
  *         property="contract",
  *         description="Associated contract with buyer information",
  *         ref="#/components/schemas/Contract"
+ *     )
+ * )
+ * 
+ * @OA\Schema(
+ *     schema="Shipment",
+ *     type="object",
+ *     title="Shipment",
+ *     description="Shipment model with complete details",
+ *     @OA\Property(property="id", type="integer", example=1, description="Unique shipment ID"),
+ *     @OA\Property(property="contract_id", type="integer", example=1, description="Foreign key to contracts table"),
+ *     @OA\Property(property="order_id", type="integer", example=1, description="Foreign key to orders table"),
+ *     @OA\Property(property="buyer_name", type="string", example="Test Buyer", description="Buyer name (auto-populated)"),
+ *     @OA\Property(property="sales_contract", type="string", example="MORD-1765279004085", description="Contract number (auto-populated)"),
+ *     @OA\Property(property="order_number", type="string", example="GCOSTING-1765275998074", description="Order number (auto-populated)"),
+ *     @OA\Property(property="shipping_date", type="string", format="date", nullable=true, example="2025-12-10", description="Date of shipment"),
+ *     @OA\Property(property="shipment_qty", type="integer", example=100, description="Quantity shipped (whole numbers only)"),
+ *     @OA\Property(property="shipment_value", type="number", format="float", example=1000.00, description="Total shipment value in USD"),
+ *     @OA\Property(property="reference_no", type="string", nullable=true, example="BL-12345", description="Reference number (BL/Invoice/Internal)"),
+ *     @OA\Property(property="remarks", type="string", nullable=true, example="First shipment", description="Additional notes"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-12-09T10:30:00Z"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-12-09T14:45:00Z"),
+ *     @OA\Property(
+ *         property="contract",
+ *         description="Associated contract with buyer information",
+ *         ref="#/components/schemas/Contract"
+ *     ),
+ *     @OA\Property(
+ *         property="order",
+ *         description="Associated order details",
+ *         ref="#/components/schemas/Order"
  *     )
  * )
  */

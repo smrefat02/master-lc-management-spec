@@ -9,6 +9,55 @@ use Illuminate\Support\Facades\Validator;
 class ShipmentController extends Controller
 {
     /**
+     * @OA\Get(
+     *     path="/api/shipments",
+     *     operationId="getShipmentsList",
+     *     tags={"Shipments"},
+     *     summary="Get list of shipments",
+     *     description="Returns paginated list of shipments with search capabilities and summary statistics",
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by buyer name, contract number, order number, or reference number",
+     *         required=false,
+     *         @OA\Schema(type="string", example="Test Buyer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1, example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15, example=15)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="shipments", type="array", @OA\Items(ref="#/components/schemas/Shipment")),
+     *             @OA\Property(property="total", type="integer", example=8),
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=1),
+     *             @OA\Property(
+     *                 property="summary",
+     *                 type="object",
+     *                 @OA\Property(property="total_shipments", type="integer", example=8),
+     *                 @OA\Property(property="total_shipped_qty", type="integer", example=450),
+     *                 @OA\Property(property="total_shipment_value", type="number", format="float", example=5050.00),
+     *                 @OA\Property(property="avg_shipment_qty", type="number", format="float", example=56.25)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Display a listing of shipments.
      */
     public function index(Request $request)
@@ -51,6 +100,49 @@ class ShipmentController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/shipments",
+     *     operationId="createShipment",
+     *     tags={"Shipments"},
+     *     summary="Create a new shipment",
+     *     description="Creates a new shipment record with auto-population of buyer, contract, and order details",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"salesContract", "order"},
+     *             @OA\Property(property="salesContract", type="integer", example=1, description="Contract ID"),
+     *             @OA\Property(property="order", type="integer", example=1, description="Order ID"),
+     *             @OA\Property(property="shippingDate", type="string", format="date", example="2025-12-10", description="Shipping date"),
+     *             @OA\Property(property="shipmentQty", type="integer", example=100, description="Quantity shipped (whole numbers)"),
+     *             @OA\Property(property="shipmentValue", type="number", format="float", example=1000.00, description="Shipment value in USD"),
+     *             @OA\Property(property="referenceNo", type="string", example="BL-12345", description="Reference number (BL/Invoice/Internal)"),
+     *             @OA\Property(property="remarks", type="string", example="First shipment", description="Additional notes")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Shipment created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Shipment created successfully"),
+     *             @OA\Property(property="shipment", ref="#/components/schemas/Shipment")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(property="salesContract", type="array", @OA\Items(type="string", example="The sales contract field is required.")),
+     *                 @OA\Property(property="order", type="array", @OA\Items(type="string", example="The order field is required."))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Store a newly created shipment.
      */
     public function store(Request $request)
@@ -96,6 +188,34 @@ class ShipmentController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/shipments/{id}",
+     *     operationId="getShipmentById",
+     *     tags={"Shipments"},
+     *     summary="Get shipment by ID",
+     *     description="Returns detailed information for a specific shipment including related contract and order data",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Shipment ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/Shipment")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Shipment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Shipment not found")
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Display the specified shipment.
      */
     public function show($id)
@@ -105,6 +225,57 @@ class ShipmentController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *     path="/api/shipments/{id}",
+     *     operationId="updateShipment",
+     *     tags={"Shipments"},
+     *     summary="Update a shipment",
+     *     description="Updates an existing shipment with new values. All fields are optional.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Shipment ID to update",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="salesContract", type="integer", example=1, description="Contract ID"),
+     *             @OA\Property(property="order", type="integer", example=1, description="Order ID"),
+     *             @OA\Property(property="shippingDate", type="string", format="date", example="2025-12-15", description="Shipping date"),
+     *             @OA\Property(property="shipmentQty", type="integer", example=150, description="Quantity shipped (whole numbers)"),
+     *             @OA\Property(property="shipmentValue", type="number", format="float", example=1500.00, description="Shipment value in USD"),
+     *             @OA\Property(property="referenceNo", type="string", example="BL-12345-UPDATED", description="Reference number"),
+     *             @OA\Property(property="remarks", type="string", example="Updated shipment", description="Additional notes")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Shipment updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Shipment updated successfully"),
+     *             @OA\Property(property="shipment", ref="#/components/schemas/Shipment")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Shipment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Shipment not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Update the specified shipment.
      */
     public function update(Request $request, string $id)
@@ -158,6 +329,36 @@ class ShipmentController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/shipments/{id}",
+     *     operationId="deleteShipment",
+     *     tags={"Shipments"},
+     *     summary="Delete a shipment",
+     *     description="Permanently deletes a shipment record from the database",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Shipment ID to delete",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Shipment deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Shipment deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Shipment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Shipment not found")
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Remove the specified shipment.
      */
     public function destroy(string $id)

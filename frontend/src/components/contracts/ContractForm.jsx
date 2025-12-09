@@ -7,13 +7,7 @@ const contractSchema = z
   .object({
     buyer_id: z.string().min(1, "Buyer is required"),
 
-    contract_no: z
-      .string()
-      .min(1, "Contract number is required")
-      .regex(
-        /^IIC\/AKCL\/CON\/\d{4}\/\d{2}$/,
-        "Invalid format. Must match: IIC/AKCL/CON/YYYY/NN"
-      ),
+    contract_no: z.string().min(1, "Contract number is required"),
 
     contract_date: z
       .string()

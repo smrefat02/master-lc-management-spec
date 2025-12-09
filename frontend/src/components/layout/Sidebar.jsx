@@ -128,12 +128,10 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 bg-indigo-600">
         <div className="w-10 h-10 bg-white rounded flex items-center justify-center flex-shrink-0">
-          <span className="text-indigo-600 font-bold text-base">DS</span>
+          <span className="text-indigo-600 font-bold text-xs">ERT</span>
         </div>
         <div className="flex flex-col">
-          <div className="text-sm font-bold tracking-wider text-white">
-            DIMENSIONS
-          </div>
+          <div className="text-sm font-bold tracking-wider text-white">ERT</div>
           <div className="text-xs text-indigo-100">GROUP</div>
         </div>
       </div>

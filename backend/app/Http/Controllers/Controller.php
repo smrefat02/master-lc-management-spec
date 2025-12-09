@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 /**
  * @OA\Info(
  *     title="LC Management API",
- *     version="1.0.0",
- *     description="Sales Contracts Management System API - Manage contracts, buyers, and contract number generation",
+ *     version="1.1.0",
+ *     description="LC Management System API - Complete system for managing contracts, buyers, and orders with cost tracking. Includes contract management, order processing, cost analysis, and comprehensive reporting capabilities.",
  *     @OA\Contact(
  *         name="API Support",
  *         email="support@lcmanagement.example.com"
@@ -31,6 +31,11 @@ namespace App\Http\Controllers;
  * @OA\Tag(
  *     name="Buyers",
  *     description="Buyer information endpoints"
+ * )
+ * 
+ * @OA\Tag(
+ *     name="Orders",
+ *     description="Order management endpoints - Create, read, update, and delete orders with cost tracking"
  * )
  * 
  * @OA\Schema(
@@ -110,6 +115,76 @@ namespace App\Http\Controllers;
  *     title="Error Response",
  *     description="Generic error response",
  *     @OA\Property(property="message", type="string", example="Resource not found")
+ * )
+ * 
+ * @OA\Schema(
+ *     schema="CostDetail",
+ *     type="object",
+ *     title="Cost Detail",
+ *     description="Individual cost item for order",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="YARN"),
+ *     @OA\Property(property="preCosting", type="number", format="decimal", example=0.50),
+ *     @OA\Property(property="budget", type="number", format="decimal", example=0.45),
+ *     @OA\Property(property="budgetPercent", type="number", format="decimal", example=5.50),
+ *     @OA\Property(property="postCosting", type="number", format="decimal", example=0.48),
+ *     @OA\Property(property="b2bPercent", type="number", format="decimal", example=6.00),
+ *     @OA\Property(property="status", type="string", example="draft")
+ * )
+ * 
+ * @OA\Schema(
+ *     schema="OrderTotals",
+ *     type="object",
+ *     title="Order Totals",
+ *     description="Calculated totals for order costs",
+ *     @OA\Property(property="fabricsPreCosting", type="number", format="decimal", example=3.50),
+ *     @OA\Property(property="fabricsBudget", type="number", format="decimal", example=3.15),
+ *     @OA\Property(property="accessoriesPreCosting", type="number", format="decimal", example=2.00),
+ *     @OA\Property(property="accessoriesBudget", type="number", format="decimal", example=1.85),
+ *     @OA\Property(property="totalPreCosting", type="number", format="decimal", example=5.50),
+ *     @OA\Property(property="totalBudget", type="number", format="decimal", example=5.00)
+ * )
+ * 
+ * @OA\Schema(
+ *     schema="Order",
+ *     type="object",
+ *     title="Order",
+ *     description="Order model with complete details",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="contract_id", type="integer", example=1),
+ *     @OA\Property(property="order_number", type="string", example="ORD-000123"),
+ *     @OA\Property(property="buyer_name", type="string", example="ABC Corp"),
+ *     @OA\Property(property="master_lc_value", type="number", format="decimal", example=50000.00),
+ *     @OA\Property(property="budget_no", type="string", example="3"),
+ *     @OA\Property(property="order_value", type="number", format="decimal", example=45000.00),
+ *     @OA\Property(property="description", type="string", example="Winter collection order"),
+ *     @OA\Property(property="contract_no", type="string", example="IIC/AKCL/CON/2025/01"),
+ *     @OA\Property(property="status", type="string", enum={"draft", "on_process", "completed", "cancelled"}, example="draft"),
+ *     @OA\Property(property="style", type="string", example="CASUAL-001"),
+ *     @OA\Property(property="fob_value", type="number", format="decimal", example=12.50),
+ *     @OA\Property(property="order_qty", type="integer", example=5000),
+ *     @OA\Property(property="shipment_date", type="string", format="date", example="2025-12-15"),
+ *     @OA\Property(property="actual_shipment", type="string", format="date", nullable=true, example="2025-12-13"),
+ *     @OA\Property(property="fabrics_details", type="string", example="100% Cotton, 180 GSM"),
+ *     @OA\Property(property="notes", type="string", example="Rush order"),
+ *     @OA\Property(
+ *         property="cost_details",
+ *         type="array",
+ *         description="Array of cost items (YARN, Knitting, Dyeing, etc.)",
+ *         @OA\Items(ref="#/components/schemas/CostDetail")
+ *     ),
+ *     @OA\Property(
+ *         property="totals",
+ *         description="Calculated totals for fabrics, accessories, and grand total",
+ *         ref="#/components/schemas/OrderTotals"
+ *     ),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-12-09T10:30:00Z"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-12-09T14:45:00Z"),
+ *     @OA\Property(
+ *         property="contract",
+ *         description="Associated contract with buyer information",
+ *         ref="#/components/schemas/Contract"
+ *     )
  * )
  */
 abstract class Controller

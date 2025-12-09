@@ -2,12 +2,12 @@
     "openapi": "3.0.0",
     "info": {
         "title": "LC Management API",
-        "description": "Sales Contracts Management System API - Manage contracts, buyers, and contract number generation",
+        "description": "LC Management System API - Complete system for managing contracts, buyers, and orders with cost tracking. Includes contract management, order processing, cost analysis, and comprehensive reporting capabilities.",
         "contact": {
             "name": "API Support",
             "email": "support@lcmanagement.example.com"
         },
-        "version": "1.0.0"
+        "version": "1.1.0"
     },
     "servers": [
         {
@@ -98,6 +98,7 @@
                             "enum": [
                                 "draft",
                                 "active",
+                                "approved",
                                 "pending",
                                 "completed",
                                 "cancelled"
@@ -311,162 +312,6 @@
                         }
                     }
                 }
-            },
-            "put": {
-                "tags": [
-                    "Contracts"
-                ],
-                "summary": "Update an existing contract",
-                "description": "Updates an existing contract. Contract number cannot be changed after creation.",
-                "operationId": "updateContract",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Contract ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "buyer_id",
-                                    "contract_date",
-                                    "total_orders",
-                                    "order_quantity",
-                                    "value_usd",
-                                    "b2b_percent",
-                                    "status"
-                                ],
-                                "properties": {
-                                    "buyer_id": {
-                                        "type": "integer",
-                                        "example": 3
-                                    },
-                                    "contract_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-08"
-                                    },
-                                    "amendment_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-15",
-                                        "nullable": true
-                                    },
-                                    "total_orders": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 15
-                                    },
-                                    "order_quantity": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 50000
-                                    },
-                                    "value_usd": {
-                                        "type": "number",
-                                        "format": "decimal",
-                                        "minimum": 0,
-                                        "example": 350000
-                                    },
-                                    "b2b_percent": {
-                                        "type": "number",
-                                        "format": "decimal",
-                                        "maximum": 100,
-                                        "minimum": 0,
-                                        "example": 25.5
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "draft",
-                                            "active",
-                                            "pending",
-                                            "completed",
-                                            "cancelled"
-                                        ],
-                                        "example": "active"
-                                    },
-                                    "remarks": {
-                                        "type": "string",
-                                        "example": "Updated contract terms",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Contract updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Contract updated successfully"
-                                        },
-                                        "contract": {
-                                            "$ref": "#/components/schemas/Contract"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Contract not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidationError"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Failed to update contract"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error details"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/api/contracts/next-number": {
@@ -537,6 +382,469 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get list of orders",
+                "description": "Returns paginated list of orders with search and filter capabilities",
+                "operationId": "getOrdersList",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by order number, buyer name, or contract number",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "122"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by order status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "on_process",
+                                "completed",
+                                "cancelled"
+                            ],
+                            "example": "draft"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "example": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "orders": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Order"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 50
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 4
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create new order",
+                "description": "Creates a new order with cost details and totals",
+                "operationId": "createOrder",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "salesContract"
+                                ],
+                                "properties": {
+                                    "salesContract": {
+                                        "description": "Contract ID (required)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "orderNumber": {
+                                        "description": "Auto-generated if empty",
+                                        "type": "string",
+                                        "example": "ORD-000123"
+                                    },
+                                    "buyerName": {
+                                        "type": "string",
+                                        "example": "ABC Corp"
+                                    },
+                                    "masterLCValue": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 50000
+                                    },
+                                    "budgetNo": {
+                                        "type": "string",
+                                        "example": "3"
+                                    },
+                                    "orderValue": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 45000
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Winter collection order"
+                                    },
+                                    "contractNo": {
+                                        "type": "string",
+                                        "example": "IIC/AKCL/CON/2025/01"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "on_process",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "style": {
+                                        "type": "string",
+                                        "example": "CASUAL-001"
+                                    },
+                                    "fobValue": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 12.5
+                                    },
+                                    "orderQty": {
+                                        "type": "integer",
+                                        "example": 5000
+                                    },
+                                    "shipmentDate": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-15"
+                                    },
+                                    "actualShipment": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-13",
+                                        "nullable": true
+                                    },
+                                    "fabricsDetails": {
+                                        "type": "string",
+                                        "example": "100% Cotton, 180 GSM"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Rush order"
+                                    },
+                                    "costDetails": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/CostDetail"
+                                        }
+                                    },
+                                    "totals": {
+                                        "$ref": "#/components/schemas/OrderTotals"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/api/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get order by ID",
+                "description": "Returns a single order with all details including cost breakdown",
+                "operationId": "getOrderById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Update existing order",
+                "description": "Updates an existing order with new data",
+                "operationId": "updateOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "orderNumber": {
+                                        "type": "string",
+                                        "example": "ORD-000123"
+                                    },
+                                    "buyerName": {
+                                        "type": "string",
+                                        "example": "ABC Corp"
+                                    },
+                                    "masterLCValue": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 50000
+                                    },
+                                    "budgetNo": {
+                                        "type": "string",
+                                        "example": "3"
+                                    },
+                                    "orderValue": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 45000
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Winter collection order"
+                                    },
+                                    "contractNo": {
+                                        "type": "string",
+                                        "example": "IIC/AKCL/CON/2025/01"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "on_process",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "on_process"
+                                    },
+                                    "style": {
+                                        "type": "string",
+                                        "example": "CASUAL-001"
+                                    },
+                                    "fobValue": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 12.5
+                                    },
+                                    "orderQty": {
+                                        "type": "integer",
+                                        "example": 5000
+                                    },
+                                    "shipmentDate": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-15"
+                                    },
+                                    "actualShipment": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-13",
+                                        "nullable": true
+                                    },
+                                    "fabricsDetails": {
+                                        "type": "string",
+                                        "example": "100% Cotton, 180 GSM"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Rush order"
+                                    },
+                                    "costDetails": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/CostDetail"
+                                        }
+                                    },
+                                    "totals": {
+                                        "$ref": "#/components/schemas/OrderTotals"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order updated successfully"
+                                        },
+                                        "order": {
+                                            "$ref": "#/components/schemas/Order"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Delete order",
+                "description": "Deletes an order permanently",
+                "operationId": "deleteOrder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "500": {
+                        "description": "Server error"
                     }
                 }
             }
@@ -716,6 +1024,197 @@
                     }
                 },
                 "type": "object"
+            },
+            "CostDetail": {
+                "title": "Cost Detail",
+                "description": "Individual cost item for order",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "YARN"
+                    },
+                    "preCosting": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 0.5
+                    },
+                    "budget": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 0.45
+                    },
+                    "budgetPercent": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 5.5
+                    },
+                    "postCosting": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 0.48
+                    },
+                    "b2bPercent": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 6
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "draft"
+                    }
+                },
+                "type": "object"
+            },
+            "OrderTotals": {
+                "title": "Order Totals",
+                "description": "Calculated totals for order costs",
+                "properties": {
+                    "fabricsPreCosting": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 3.5
+                    },
+                    "fabricsBudget": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 3.15
+                    },
+                    "accessoriesPreCosting": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 2
+                    },
+                    "accessoriesBudget": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 1.85
+                    },
+                    "totalPreCosting": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 5.5
+                    },
+                    "totalBudget": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "Order": {
+                "title": "Order",
+                "description": "Order model with complete details",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "contract_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "order_number": {
+                        "type": "string",
+                        "example": "ORD-000123"
+                    },
+                    "buyer_name": {
+                        "type": "string",
+                        "example": "ABC Corp"
+                    },
+                    "master_lc_value": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 50000
+                    },
+                    "budget_no": {
+                        "type": "string",
+                        "example": "3"
+                    },
+                    "order_value": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 45000
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Winter collection order"
+                    },
+                    "contract_no": {
+                        "type": "string",
+                        "example": "IIC/AKCL/CON/2025/01"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "on_process",
+                            "completed",
+                            "cancelled"
+                        ],
+                        "example": "draft"
+                    },
+                    "style": {
+                        "type": "string",
+                        "example": "CASUAL-001"
+                    },
+                    "fob_value": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 12.5
+                    },
+                    "order_qty": {
+                        "type": "integer",
+                        "example": 5000
+                    },
+                    "shipment_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-12-15"
+                    },
+                    "actual_shipment": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-12-13",
+                        "nullable": true
+                    },
+                    "fabrics_details": {
+                        "type": "string",
+                        "example": "100% Cotton, 180 GSM"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Rush order"
+                    },
+                    "cost_details": {
+                        "description": "Array of cost items (YARN, Knitting, Dyeing, etc.)",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CostDetail"
+                        }
+                    },
+                    "totals": {
+                        "$ref": "#/components/schemas/OrderTotals"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-09T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-09T14:45:00Z"
+                    },
+                    "contract": {
+                        "$ref": "#/components/schemas/Contract"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -727,6 +1226,10 @@
         {
             "name": "Buyers",
             "description": "Buyer information endpoints"
+        },
+        {
+            "name": "Orders",
+            "description": "Order management endpoints - Create, read, update, and delete orders with cost tracking"
         }
     ]
 }

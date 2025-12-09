@@ -9,6 +9,54 @@ use Illuminate\Support\Facades\Validator;
 class OrderController extends Controller
 {
     /**
+     * @OA\Get(
+     *     path="/api/orders",
+     *     operationId="getOrdersList",
+     *     tags={"Orders"},
+     *     summary="Get list of orders",
+     *     description="Returns paginated list of orders with search and filter capabilities",
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by order number, buyer name, or contract number",
+     *         required=false,
+     *         @OA\Schema(type="string", example="122")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by order status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"draft", "on_process", "completed", "cancelled"}, example="draft")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15, example=15)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="orders", type="array", @OA\Items(ref="#/components/schemas/Order")),
+     *             @OA\Property(property="total", type="integer", example=50),
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=4)
+     *         )
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Display a listing of orders.
      */
     public function index(Request $request)
@@ -43,6 +91,56 @@ class OrderController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/orders",
+     *     operationId="createOrder",
+     *     tags={"Orders"},
+     *     summary="Create new order",
+     *     description="Creates a new order with cost details and totals",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"salesContract"},
+     *             @OA\Property(property="salesContract", type="integer", example=1, description="Contract ID (required)"),
+     *             @OA\Property(property="orderNumber", type="string", example="ORD-000123", description="Auto-generated if empty"),
+     *             @OA\Property(property="buyerName", type="string", example="ABC Corp"),
+     *             @OA\Property(property="masterLCValue", type="number", format="decimal", example=50000.00),
+     *             @OA\Property(property="budgetNo", type="string", example="3"),
+     *             @OA\Property(property="orderValue", type="number", format="decimal", example=45000.00),
+     *             @OA\Property(property="description", type="string", example="Winter collection order"),
+     *             @OA\Property(property="contractNo", type="string", example="IIC/AKCL/CON/2025/01"),
+     *             @OA\Property(property="status", type="string", enum={"draft", "on_process", "completed", "cancelled"}, example="draft"),
+     *             @OA\Property(property="style", type="string", example="CASUAL-001"),
+     *             @OA\Property(property="fobValue", type="number", format="decimal", example=12.50),
+     *             @OA\Property(property="orderQty", type="integer", example=5000),
+     *             @OA\Property(property="shipmentDate", type="string", format="date", example="2025-12-15"),
+     *             @OA\Property(property="actualShipment", type="string", format="date", nullable=true, example="2025-12-13"),
+     *             @OA\Property(property="fabricsDetails", type="string", example="100% Cotton, 180 GSM"),
+     *             @OA\Property(property="notes", type="string", example="Rush order"),
+     *             @OA\Property(
+     *                 property="costDetails",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/CostDetail")
+     *             ),
+     *             @OA\Property(
+     *                 property="totals",
+     *                 ref="#/components/schemas/OrderTotals"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Order created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Store a newly created order.
      */
     public function store(Request $request)
@@ -98,15 +196,96 @@ class OrderController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/orders/{id}",
+     *     operationId="getOrderById",
+     *     tags={"Orders"},
+     *     summary="Get order by ID",
+     *     description="Returns a single order with all details including cost breakdown",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Order ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *     @OA\Response(response=404, description="Order not found"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Display the specified order.
      */
-    public function show(string $id)
+    public function show($id)
     {
         $order = Order::with('contract.buyer')->findOrFail($id);
         return response()->json($order);
     }
 
     /**
+     * @OA\Put(
+     *     path="/api/orders/{id}",
+     *     operationId="updateOrder",
+     *     tags={"Orders"},
+     *     summary="Update existing order",
+     *     description="Updates an existing order with new data",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Order ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="orderNumber", type="string", example="ORD-000123"),
+     *             @OA\Property(property="buyerName", type="string", example="ABC Corp"),
+     *             @OA\Property(property="masterLCValue", type="number", format="decimal", example=50000.00),
+     *             @OA\Property(property="budgetNo", type="string", example="3"),
+     *             @OA\Property(property="orderValue", type="number", format="decimal", example=45000.00),
+     *             @OA\Property(property="description", type="string", example="Winter collection order"),
+     *             @OA\Property(property="contractNo", type="string", example="IIC/AKCL/CON/2025/01"),
+     *             @OA\Property(property="status", type="string", enum={"draft", "on_process", "completed", "cancelled"}, example="on_process"),
+     *             @OA\Property(property="style", type="string", example="CASUAL-001"),
+     *             @OA\Property(property="fobValue", type="number", format="decimal", example=12.50),
+     *             @OA\Property(property="orderQty", type="integer", example=5000),
+     *             @OA\Property(property="shipmentDate", type="string", format="date", example="2025-12-15"),
+     *             @OA\Property(property="actualShipment", type="string", format="date", nullable=true, example="2025-12-13"),
+     *             @OA\Property(property="fabricsDetails", type="string", example="100% Cotton, 180 GSM"),
+     *             @OA\Property(property="notes", type="string", example="Rush order"),
+     *             @OA\Property(
+     *                 property="costDetails",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/CostDetail")
+     *             ),
+     *             @OA\Property(
+     *                 property="totals",
+     *                 ref="#/components/schemas/OrderTotals"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Order updated successfully"),
+     *             @OA\Property(property="order", ref="#/components/schemas/Order")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Order not found"),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Update the specified order.
      */
     public function update(Request $request, string $id)
@@ -155,6 +334,30 @@ class OrderController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/orders/{id}",
+     *     operationId="deleteOrder",
+     *     tags={"Orders"},
+     *     summary="Delete order",
+     *     description="Deletes an order permanently",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Order ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Order deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Order not found"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     * 
      * Remove the specified order.
      */
     public function destroy(string $id)

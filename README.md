@@ -1,6 +1,6 @@
-# LC Management System - Sales Contracts
+# LC Management System - Sales Contracts & Orders
 
-Full-stack sales contract management system with React frontend, Laravel backend, and comprehensive testing.
+Full-stack management system for sales contracts, orders, and shipments with React frontend, Laravel backend, and comprehensive testing.
 
 ## Project Structure
 
@@ -191,6 +191,22 @@ curl "http://localhost:8000/api/buyers"
 
 - `GET /api/buyers` - List all buyers
 
+### Order Endpoints
+
+- `GET /api/orders` - List all orders with pagination
+- `POST /api/orders` - Create new order
+- `GET /api/orders/{id}` - Get single order
+- `PUT /api/orders/{id}` - Update order
+- `DELETE /api/orders/{id}` - Delete order
+
+### Shipment Endpoints
+
+- `GET /api/shipments?search={query}&page={page}` - List all shipments with search
+- `POST /api/shipments` - Create new shipment
+- `GET /api/shipments/{id}` - Get single shipment
+- `PUT /api/shipments/{id}` - Update shipment
+- `DELETE /api/shipments/{id}` - Delete shipment
+
 ## Contract Number Format
 
 Format: `IIC/AKCL/CON/YYYY/NN`
@@ -261,10 +277,35 @@ Example: `IIC/AKCL/CON/2025/01`
 - Full validation on updates
 - 20+ E2E tests for view/edit workflow
 
-### 🔄 Phase 7: Documentation (In Progress)
+### ✅ Phase 7: Orders Management Module
+
+- Complete CRUD operations for orders
+- Order creation with contract selection
+- Cost details table with 14 default cost items
+- Before & After post cost report calculations
+- Dynamic row management (add/delete cost items)
+- Budget tracking and percentage calculations
+- Real-time cost aggregations
+- View and edit order functionality
+- [Full Documentation](./ORDERS_SPECIFICATION.md)
+
+### ✅ Phase 8: Shipments Management Module
+
+- Complete CRUD operations for shipments
+- Shipment tracking against contracts and orders
+- Summary statistics dashboard (4 cards)
+- 3 decimal precision for quantities (e.g., 1.483)
+- Add/Edit shipment modals
+- Search across buyer/contract/order/reference
+- View shipment details page
+- Pagination support
+- [Full Documentation](./SHIPMENTS_SPECIFICATION.md)
+
+### 🔄 Phase 9: Documentation
 
 - README with setup instructions
 - cURL examples for API testing
+- Complete specification documents
 - Test running instructions
 
 ## Test Coverage

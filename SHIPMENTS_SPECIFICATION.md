@@ -19,12 +19,12 @@ Complete shipment management system with create, read, update, and delete functi
 
 #### Summary Cards (4 Cards)
 
-| Card                 | Color              | Display                                     |
-| -------------------- | ------------------ | ------------------------------------------- |
-| Total Shipments      | Blue (blue-50)     | Count of all shipments                      |
-| Total Shipped Qty    | Green (green-50)   | Sum of all shipment quantities (3 decimals) |
-| Total Shipment Value | Purple (purple-50) | Sum in USD format ($X,XXX.XX)               |
-| Avg Shipment Qty     | Orange (orange-50) | Average quantity (2 decimals)               |
+| Card                 | Color              | Display                                   |
+| -------------------- | ------------------ | ----------------------------------------- |
+| Total Shipments      | Blue (blue-50)     | Count of all shipments                    |
+| Total Shipped Qty    | Green (green-50)   | Sum of all shipment quantities (integers) |
+| Total Shipment Value | Purple (purple-50) | Sum in USD format ($X,XXX.XX)             |
+| Avg Shipment Qty     | Orange (orange-50) | Average quantity (2 decimals)             |
 
 #### Search & Filter
 
@@ -46,7 +46,7 @@ Complete shipment management system with create, read, update, and delete functi
 | Sales Contract | Text | Contract number (indigo color) |
 | Order | Text | Order number |
 | Shipping Date | Date | MM/DD/YYYY format |
-| Shipment Qty | Number | 3 decimal places |
+| Shipment Qty | Integer | Whole numbers only (1, 2, 34, 67, etc.) |
 | Shipment Value | Currency | $X,XXX.XX format |
 | Reference No | Text | BL/Invoice/Internal ref |
 | Action | Buttons | View, Edit |
@@ -123,7 +123,7 @@ Same fields as Add Modal, pre-populated with existing data:
 | Sales Contract       | Dropdown | ✅ Yes   | Shows current contract with buyer name |
 | Order                | Dropdown | ✅ Yes   | Filtered by contract                   |
 | Shipping Date        | Date     | ✅ Yes   | Format: YYYY-MM-DD                     |
-| Shipment Qty         | Number   | ✅ Yes   | 3 decimal precision (e.g., 1.483)      |
+| Shipment Qty         | Integer  | ✅ Yes   | Whole numbers only (e.g., 1, 34, 67)   |
 | Shipment Value (USD) | Number   | ✅ Yes   | 2 decimal precision                    |
 | Reference No         | Text     | ✅ Yes   | Optional reference                     |
 | Remarks              | Textarea | ✅ Yes   | Full-width, 3 rows                     |
@@ -193,7 +193,7 @@ CREATE TABLE shipments (
     sales_contract VARCHAR(255) NOT NULL,
     order_number VARCHAR(255) NOT NULL,
     shipping_date DATE NULL,
-    shipment_qty DECIMAL(15, 3) NOT NULL DEFAULT 0,  -- 3 decimal places
+    shipment_qty INT NOT NULL DEFAULT 0,  -- Integer (whole numbers only)
     shipment_value DECIMAL(15, 2) NOT NULL DEFAULT 0, -- 2 decimal places
     reference_no VARCHAR(255) NULL,
     remarks TEXT NULL,
@@ -208,7 +208,7 @@ CREATE TABLE shipments (
 **Key Features:**
 
 - Foreign keys to `contracts` and `orders` with cascade delete
-- 3 decimal precision for quantities (supports values like 1.483)
+- Integer quantities (whole numbers only: 1, 2, 34, 67, etc.)
 - 2 decimal precision for currency values
 - Nullable fields for date, reference, and remarks
 - Auto-populates buyer_name, sales_contract, order_number
@@ -838,7 +838,8 @@ const formatDateForInput = (dateString) => {
 ## 📚 Related Documentation
 
 - [Orders Specification](./ORDERS_SPECIFICATION.md)
-- [Swagger API Documentation](./SWAGGER_ORDERS_API.md)
+- [Swagger Orders API](./SWAGGER_ORDERS_API.md)
+- [Swagger Shipments API](./SWAGGER_SHIPMENTS_API.md)
 - [README](./README.md)
 
 ---

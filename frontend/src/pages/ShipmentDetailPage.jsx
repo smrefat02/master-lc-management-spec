@@ -294,7 +294,8 @@ export default function ShipmentDetailPage() {
                 {isEditing ? (
                   <input
                     type="number"
-                    step="0.001"
+                    step="1"
+                    min="0"
                     name="shipmentQty"
                     value={formData.shipmentQty}
                     onChange={handleInputChange}

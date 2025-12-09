@@ -258,7 +258,8 @@ export default function EditShipmentModal({
                 </label>
                 <input
                   type="number"
-                  step="0.001"
+                  step="1"
+                  min="0"
                   name="shipmentQty"
                   value={formData.shipmentQty}
                   onChange={handleInputChange}

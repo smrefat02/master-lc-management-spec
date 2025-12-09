@@ -466,7 +466,18 @@ export default function CreateOrder() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save order");
+        console.error("Validation errors:", errorData);
+
+        // Build detailed error message
+        let errorMessage = errorData.message || "Failed to save order";
+        if (errorData.errors) {
+          const errorDetails = Object.entries(errorData.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+            .join("\n");
+          errorMessage += "\n\nDetails:\n" + errorDetails;
+        }
+
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();

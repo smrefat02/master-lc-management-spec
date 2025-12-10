@@ -7,6 +7,9 @@ import CreateOrder from "./pages/CreateOrder";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import ShipmentsOverview from "./pages/ShipmentsOverview";
 import ShipmentDetailPage from "./pages/ShipmentDetailPage";
+import B2BLCList from "./pages/B2BLCList";
+import CreateB2BLC from "./pages/CreateB2BLC";
+import B2BLCDetail from "./pages/B2BLCDetail";
 
 function App() {
   return (
@@ -21,6 +24,9 @@ function App() {
           <Route path="/shipments" element={<ShipmentsOverview />} />
           <Route path="/shipments/:id" element={<ShipmentDetailPage />} />
           <Route path="/shipments/:id/edit" element={<ShipmentDetailPage />} />
+          <Route path="/b2b-lc" element={<B2BLCList />} />
+          <Route path="/b2b-lc/create" element={<CreateB2BLC />} />
+          <Route path="/b2b-lc/:id" element={<B2BLCDetail />} />
         </Routes>
       </Layout>
     </Router>

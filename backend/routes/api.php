@@ -6,6 +6,7 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\B2BLCController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -35,3 +36,10 @@ Route::post('/shipments', [ShipmentController::class, 'store']);
 Route::get('/shipments/{id}', [ShipmentController::class, 'show']);
 Route::put('/shipments/{id}', [ShipmentController::class, 'update']);
 Route::delete('/shipments/{id}', [ShipmentController::class, 'destroy']);
+
+// B2B LC routes
+Route::get('/b2b-lc', [B2BLCController::class, 'index']);
+Route::post('/b2b-lc', [B2BLCController::class, 'store']);
+Route::get('/b2b-lc/{b2bLc}', [B2BLCController::class, 'show']);
+Route::put('/b2b-lc/{b2bLc}', [B2BLCController::class, 'update']);
+Route::delete('/b2b-lc/{b2bLc}', [B2BLCController::class, 'destroy']);

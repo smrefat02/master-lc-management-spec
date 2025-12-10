@@ -22,7 +22,7 @@ class UpdateB2BLCRequest extends FormRequest
      */
     public function rules(): array
     {
-        $b2blcId = $this->route('b2b_lc');
+        $b2blcId = $this->route('b2bLc');
         
         return [
             'contract_id' => 'sometimes|exists:contracts,id',

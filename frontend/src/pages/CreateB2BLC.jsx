@@ -83,13 +83,24 @@ export default function CreateB2BLC() {
         if (!response.ok) throw new Error("Failed to fetch order details");
         const data = await response.json();
 
+        console.log("Order data received:", data);
+        console.log("Raw cost_details:", data.cost_details);
+
         // Parse cost_details JSON and create costing details array
         let costDetails = [];
         try {
-          costDetails =
-            typeof data.cost_details === "string"
-              ? JSON.parse(data.cost_details)
-              : data.cost_details || [];
+          if (data.cost_details) {
+            costDetails =
+              typeof data.cost_details === "string"
+                ? JSON.parse(data.cost_details)
+                : data.cost_details;
+
+            // Ensure it's an array
+            if (!Array.isArray(costDetails)) {
+              costDetails = [];
+            }
+          }
+          console.log("Parsed costDetails:", costDetails);
         } catch (e) {
           console.error("Error parsing cost_details:", e);
           costDetails = [];
@@ -150,22 +161,28 @@ export default function CreateB2BLC() {
   const handleCostingDetailChange = (e) => {
     const costingDetailId = parseInt(e.target.value);
 
-    // Find selected costing detail and auto-fill supplier, qty, fob
+    // Find selected costing detail and auto-fill supplier, fob (but NOT qty - keep order qty)
     const selectedCosting = costingDetails.find(
       (detail) => detail.id === costingDetailId
     );
 
+    console.log("Selected costing detail:", selectedCosting);
+
     if (selectedCosting) {
-      const qty = selectedCosting.quantity || "";
-      const fob = selectedCosting.fob || "";
+      const fob = selectedCosting.fob || selectedCosting.fob_value || "";
+      const supplier =
+        selectedCosting.supplier || selectedCosting.supplier_name || "";
+
+      // Calculate order value using existing order_qty and new fob
       const orderValue =
-        qty && fob ? (parseFloat(qty) * parseFloat(fob)).toFixed(2) : "";
+        formData.order_qty && fob
+          ? (parseFloat(formData.order_qty) * parseFloat(fob)).toFixed(2)
+          : "";
 
       setFormData((prev) => ({
         ...prev,
         costing_detail_id: costingDetailId,
-        supplier: selectedCosting.supplier || "",
-        order_qty: qty,
+        supplier: supplier,
         fob_value: fob,
         order_value: orderValue,
         b2b_percent:
@@ -407,14 +424,28 @@ export default function CreateB2BLC() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
                     >
                       <option value="">-- Select Costing Detail --</option>
-                      {costingDetails.map((detail) => (
-                        <option key={detail.id} value={detail.id}>
-                          {detail.supplier} - {detail.item_type}
+                      {costingDetails.length === 0 && formData.order_id && (
+                        <option value="" disabled>
+                          No costing details found for this order
+                        </option>
+                      )}
+                      {costingDetails.map((detail, index) => (
+                        <option key={detail.id || index} value={detail.id}>
+                          {detail.supplier ||
+                            detail.supplier_name ||
+                            "Supplier"}{" "}
+                          -{" "}
+                          {detail.item_type ||
+                            detail.item ||
+                            detail.description ||
+                            `Item ${detail.id || index + 1}`}
                         </option>
                       ))}
                     </select>
                     <p className="mt-1 text-xs text-gray-400">
-                      Costing depends on order
+                      {formData.order_id && costingDetails.length === 0
+                        ? "⚠️ This order has no costing details. Please add costing details to the order first."
+                        : "Costing depends on order"}
                     </p>
                     {errors.costing_detail_id && (
                       <p className="mt-1 text-xs text-red-600">

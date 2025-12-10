@@ -78,20 +78,33 @@ Complete order management system with create, read, update, and delete functiona
   | SL | Auto | Serial number |
   | COST DETAILS | Text (Editable) | Item name |
   | PRE-COSTING ($) | Number with spinner | Pre-cost amount |
-  | BUDGET ($) | Number with spinner | Budget amount |
-  | BUDGET (%) | Auto-calculated | Percentage |
-  | POST COSTING/RECEIVED PI VALUE ($) | Number | Actual cost |
-  | B2B (%) | Auto-calculated | B2B percentage |
+  | BUDGET ($) | Number with spinner (editable) | Budget amount |
+  | BUDGET (%) | Auto-calculated (readonly) | (Budget / Order Value) × 100 |
+  | POST COSTING/RECEIVED PI VALUE ($) | Number with spinner (editable) | Actual/received cost |
+  | B2B (%) | Auto-calculated (readonly) | (Post Costing / Order Value) × 100 |
   | STATUS | Badge | Draft/Active/etc |
   | ACTION | Button | Delete icon |
 
 - **Automatic Calculations:**
 
-  - Total Fabrics Cost (rows 1-7)
-  - Total Accessories Cost (rows 8-14)
-  - Grand Total (all rows)
-  - Separate totals for PRE-COSTING and BUDGET columns
-  - Real-time calculation using React useEffect
+  - **Individual Row Percentages:**
+
+    - BUDGET (%) = (Budget $ / Order Value) × 100
+    - B2B (%) = (Post Costing $ / Order Value) × 100
+    - Requires Order Value > 0 to calculate
+    - Recalculates automatically when Order Value changes
+
+  - **Summary Rows:**
+
+    - Total Fabrics Cost (rows 1-7): Sums and calculates percentages based on Order Value
+    - Total Accessories Cost (rows 8+): Sums and calculates percentages based on Order Value
+    - Grand Total (all rows): Shows total amounts and percentages
+
+  - **Real-time Updates:**
+    - useEffect hook monitors Order Value changes
+    - handleCostDetailChange triggers when Budget or Post Costing fields change
+    - Console logging for debugging (shows calculation values)
+    - Warning banner displayed when Order Value is 0 or empty
 
 - **Row Management:**
   - ➕ Add New Row button (adds blank cost item)
@@ -480,6 +493,32 @@ useEffect(() => {
 - **Problem:** Totals not auto-calculating on input change
 - **Solution:** Added useEffect hook with costDetails dependency
 - **Status:** ✅ Fixed
+
+### 5. **Percentage Auto-Calculation (December 10, 2025)**
+
+- **Problem:** Budget (%) and B2B (%) showing 0.00% even when dollar values entered
+- **Root Causes:**
+  1. Post Costing field was read-only text instead of editable input
+  2. Percentage calculations had conditions preventing calculation when values were 0
+  3. Total row percentages calculated against totalBudget instead of orderValue
+  4. No visual feedback when Order Value is missing
+- **Solutions Applied:**
+  1. ✅ Converted POST COSTING field from display text to editable number input
+  2. ✅ Removed conditional checks preventing 0 value calculations
+  3. ✅ Fixed Total Fabrics Cost Budget (%) to use orderValue: `(fabricsBudget / orderValue) × 100`
+  4. ✅ Fixed Total Accessories Budget (%) to use orderValue: `(accessoriesBudget / orderValue) × 100`
+  5. ✅ Fixed Total Cost Budget (%) from hardcoded "100.00%" to calculated: `(totalBudget / orderValue) × 100`
+  6. ✅ Added Post Costing totals calculation for all summary rows
+  7. ✅ Added B2B (%) calculations for all summary rows based on orderValue
+  8. ✅ Added console.log debugging to track calculation values
+  9. ✅ Added yellow warning banner when Order Value is 0 or empty
+  10. ✅ Added % symbol display after percentage values for better UX
+- **User Workflow:**
+  1. Enter Order Value first (required for percentage calculations)
+  2. Enter Budget ($) → Budget (%) auto-calculates
+  3. Enter Post Costing ($) → B2B (%) auto-calculates
+  4. Change Order Value → All percentages recalculate automatically
+- **Status:** ✅ Fixed and Verified
 
 ---
 

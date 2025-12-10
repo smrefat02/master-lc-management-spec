@@ -238,6 +238,33 @@ export default function CreateOrder() {
     });
   }, [costDetails]);
 
+  // Recalculate all percentages when orderValue changes
+  useEffect(() => {
+    const orderValue = parseFloat(formData.orderValue) || 0;
+    if (orderValue > 0) {
+      setCostDetails((prev) =>
+        prev.map((item) => {
+          const budgetValue = parseFloat(item.budget) || 0;
+          const postCostingValue = parseFloat(item.postCosting) || 0;
+          return {
+            ...item,
+            budgetPercent: ((budgetValue / orderValue) * 100).toFixed(2),
+            b2bPercent: ((postCostingValue / orderValue) * 100).toFixed(2),
+          };
+        })
+      );
+    } else {
+      // Reset percentages to 0.00 when orderValue is 0
+      setCostDetails((prev) =>
+        prev.map((item) => ({
+          ...item,
+          budgetPercent: "0.00",
+          b2bPercent: "0.00",
+        }))
+      );
+    }
+  }, [formData.orderValue]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -273,7 +300,67 @@ export default function CreateOrder() {
 
   const handleCostDetailChange = (id, field, value) => {
     setCostDetails((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+      prev.map((item) => {
+        if (item.id === id) {
+          const updatedItem = { ...item, [field]: value };
+
+          // Auto-calculate Budget (%) when budget changes
+          if (field === "budget") {
+            const budgetValue = parseFloat(value) || 0;
+            const orderValue = parseFloat(formData.orderValue) || 0;
+            console.log("Budget calculation:", {
+              budgetValue,
+              orderValue,
+              formDataOrderValue: formData.orderValue,
+            });
+            if (orderValue > 0) {
+              updatedItem.budgetPercent = (
+                (budgetValue / orderValue) *
+                100
+              ).toFixed(2);
+              console.log(
+                "Budget percent calculated:",
+                updatedItem.budgetPercent
+              );
+            } else {
+              updatedItem.budgetPercent = "0.00";
+              if (budgetValue > 0) {
+                console.warn(
+                  "⚠️ Cannot calculate Budget (%). Please enter Order Value first!"
+                );
+              }
+            }
+          }
+
+          // Auto-calculate B2B (%) when postCosting changes
+          if (field === "postCosting") {
+            const postCostingValue = parseFloat(value) || 0;
+            const orderValue = parseFloat(formData.orderValue) || 0;
+            console.log("B2B calculation:", {
+              postCostingValue,
+              orderValue,
+              formDataOrderValue: formData.orderValue,
+            });
+            if (orderValue > 0) {
+              updatedItem.b2bPercent = (
+                (postCostingValue / orderValue) *
+                100
+              ).toFixed(2);
+              console.log("B2B percent calculated:", updatedItem.b2bPercent);
+            } else {
+              updatedItem.b2bPercent = "0.00";
+              if (postCostingValue > 0) {
+                console.warn(
+                  "⚠️ Cannot calculate B2B (%). Please enter Order Value first!"
+                );
+              }
+            }
+          }
+
+          return updatedItem;
+        }
+        return item;
+      })
     );
   };
 
@@ -954,6 +1041,34 @@ export default function CreateOrder() {
             </div>
           </div>
 
+          {/* Warning Banner - Order Value Required */}
+          {(!formData.orderValue || parseFloat(formData.orderValue) === 0) && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 px-6 py-3">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-yellow-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700 font-medium">
+                    ⚠️ Please enter{" "}
+                    <span className="font-bold">Order Value</span> above to
+                    automatically calculate Budget (%) and B2B (%) percentages.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Cost Details Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full">
@@ -989,7 +1104,8 @@ export default function CreateOrder() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {costDetails.map((item, index) => (
+                {/* Render Fabrics Items (first 7 rows) */}
+                {costDetails.slice(0, 7).map((item, index) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {index + 1}
@@ -1039,13 +1155,25 @@ export default function CreateOrder() {
                       />
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
-                      {item.budgetPercent}
+                      {item.budgetPercent}%
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.postCosting}
+                        onChange={(e) =>
+                          handleCostDetailChange(
+                            item.id,
+                            "postCosting",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
-                      {item.postCosting}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {item.b2bPercent}
+                      {item.b2bPercent}%
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">
@@ -1076,7 +1204,7 @@ export default function CreateOrder() {
                   </tr>
                 ))}
 
-                {/* Total Fabrics Cost Row */}
+                {/* Total Fabrics Cost Row (after first 7 rows) */}
                 <tr className="bg-gray-50 font-semibold">
                   <td colSpan="2" className="px-4 py-3 text-sm text-gray-900">
                     Total Fabrics Cost
@@ -1088,18 +1216,143 @@ export default function CreateOrder() {
                     ${totals.fabricsBudget.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm text-blue-600">
-                    {totals.fabricsBudget > 0
-                      ? (
-                          (totals.fabricsBudget / totals.totalBudget) *
-                          100
-                        ).toFixed(2)
-                      : "0.00"}
+                    {(() => {
+                      const orderValue = parseFloat(formData.orderValue) || 0;
+                      return orderValue > 0
+                        ? ((totals.fabricsBudget / orderValue) * 100).toFixed(2)
+                        : "0.00";
+                    })()}
                     %
                   </td>
-                  <td className="px-4 py-3 text-sm text-blue-600">$0.00</td>
-                  <td className="px-4 py-3 text-sm text-blue-600">0.00%</td>
+                  <td className="px-4 py-3 text-sm text-blue-600">
+                    $
+                    {costDetails
+                      .slice(0, 7)
+                      .reduce(
+                        (sum, item) =>
+                          sum + (parseFloat(item.postCosting) || 0),
+                        0
+                      )
+                      .toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-blue-600">
+                    {(() => {
+                      const orderValue = parseFloat(formData.orderValue) || 0;
+                      const fabricsPostCosting = costDetails
+                        .slice(0, 7)
+                        .reduce(
+                          (sum, item) =>
+                            sum + (parseFloat(item.postCosting) || 0),
+                          0
+                        );
+                      return orderValue > 0
+                        ? ((fabricsPostCosting / orderValue) * 100).toFixed(2)
+                        : "0.00";
+                    })()}
+                    %
+                  </td>
                   <td colSpan="2"></td>
                 </tr>
+
+                {/* Render Accessories Items (from row 8 onwards) */}
+                {costDetails.slice(7).map((item, index) => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {index + 8}
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(e) =>
+                          handleCostDetailChange(
+                            item.id,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.preCosting}
+                        onChange={(e) =>
+                          handleCostDetailChange(
+                            item.id,
+                            "preCosting",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.budget}
+                        onChange={(e) =>
+                          handleCostDetailChange(
+                            item.id,
+                            "budget",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {item.budgetPercent}%
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.postCosting}
+                        onChange={(e) =>
+                          handleCostDetailChange(
+                            item.id,
+                            "postCosting",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {item.b2bPercent}%
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleRemoveRow(item.id)}
+                        className="text-gray-400 hover:text-red-600 transition-colors"
+                        disabled={costDetails.length === 1}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
 
                 {/* Total Accessories Row */}
                 <tr className="bg-gray-50 font-semibold">
@@ -1113,16 +1366,46 @@ export default function CreateOrder() {
                     ${totals.accessoriesBudget.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm text-blue-600">
-                    {totals.accessoriesBudget > 0
-                      ? (
-                          (totals.accessoriesBudget / totals.totalBudget) *
-                          100
-                        ).toFixed(2)
-                      : "0.00"}
+                    {(() => {
+                      const orderValue = parseFloat(formData.orderValue) || 0;
+                      return orderValue > 0
+                        ? (
+                            (totals.accessoriesBudget / orderValue) *
+                            100
+                          ).toFixed(2)
+                        : "0.00";
+                    })()}
                     %
                   </td>
-                  <td className="px-4 py-3 text-sm text-blue-600">$0.00</td>
-                  <td className="px-4 py-3 text-sm text-blue-600">0.00%</td>
+                  <td className="px-4 py-3 text-sm text-blue-600">
+                    $
+                    {costDetails
+                      .slice(7)
+                      .reduce(
+                        (sum, item) =>
+                          sum + (parseFloat(item.postCosting) || 0),
+                        0
+                      )
+                      .toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-blue-600">
+                    {(() => {
+                      const orderValue = parseFloat(formData.orderValue) || 0;
+                      const accessoriesPostCosting = costDetails
+                        .slice(7)
+                        .reduce(
+                          (sum, item) =>
+                            sum + (parseFloat(item.postCosting) || 0),
+                          0
+                        );
+                      return orderValue > 0
+                        ? ((accessoriesPostCosting / orderValue) * 100).toFixed(
+                            2
+                          )
+                        : "0.00";
+                    })()}
+                    %
+                  </td>
                   <td colSpan="2"></td>
                 </tr>
 
@@ -1138,10 +1421,38 @@ export default function CreateOrder() {
                     ${totals.totalBudget.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {totals.totalBudget > 0 ? "100.00" : "0.00"}%
+                    {(() => {
+                      const orderValue = parseFloat(formData.orderValue) || 0;
+                      return orderValue > 0
+                        ? ((totals.totalBudget / orderValue) * 100).toFixed(2)
+                        : "0.00";
+                    })()}
+                    %
                   </td>
-                  <td className="px-4 py-3 text-sm">$0.00</td>
-                  <td className="px-4 py-3 text-sm">0.00%</td>
+                  <td className="px-4 py-3 text-sm">
+                    $
+                    {costDetails
+                      .reduce(
+                        (sum, item) =>
+                          sum + (parseFloat(item.postCosting) || 0),
+                        0
+                      )
+                      .toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {(() => {
+                      const orderValue = parseFloat(formData.orderValue) || 0;
+                      const totalPostCosting = costDetails.reduce(
+                        (sum, item) =>
+                          sum + (parseFloat(item.postCosting) || 0),
+                        0
+                      );
+                      return orderValue > 0
+                        ? ((totalPostCosting / orderValue) * 100).toFixed(2)
+                        : "0.00";
+                    })()}
+                    %
+                  </td>
                   <td colSpan="2"></td>
                 </tr>
               </tbody>

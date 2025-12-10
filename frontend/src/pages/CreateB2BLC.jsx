@@ -96,6 +96,14 @@ export default function CreateB2BLC() {
         }
 
         setCostingDetails(costDetails);
+
+        // Auto-fill Order Qty from order data
+        if (data.order_qty) {
+          setFormData((prev) => ({
+            ...prev,
+            order_qty: data.order_qty,
+          }));
+        }
       } catch (error) {
         console.error("Error fetching order details:", error);
         setCostingDetails([]);

@@ -63,6 +63,11 @@ class OrderController extends Controller
     {
         $query = Order::with('contract.buyer');
 
+        // Filter by contract_id (for dependent dropdown in B2B LC creation)
+        if ($request->has('contract_id') && $request->contract_id !== '') {
+            $query->where('contract_id', $request->contract_id);
+        }
+
         // Search functionality
         if ($request->has('search')) {
             $search = $request->search;

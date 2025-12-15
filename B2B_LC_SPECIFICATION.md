@@ -2,9 +2,76 @@
 
 **Project:** LC Management System  
 **Module:** B2B LC Management  
-**Version:** 1.0.0  
-**Date:** December 10, 2025  
-**Status:** 📋 Ready for Implementation
+**Version:** 1.1.0  
+**Date:** December 15, 2025  
+**Status:** ✅ Implemented with Updates
+
+---
+
+## 📝 Recent Updates (v1.1.0 - December 15, 2025)
+
+### Costing Detail Integration Fixes
+
+**Issue:** Costing details dropdown was displaying "undefined - undefined" because it tried to access non-existent fields (`supplier`, `item_type`) from order cost_details.
+
+**Root Cause:** Order cost_details structure contains:
+
+- `id`, `name`, `preCosting`, `budget`, `budgetPercent`, `postCosting`, `b2bPercent`, `status`
+- Does NOT contain `supplier` or `item_type` fields
+
+**Fixes Applied:**
+
+1. **Dropdown Display Logic** (`CreateB2BLC.jsx` line ~450):
+
+   ```jsx
+   // OLD (incorrect):
+   {detail.supplier} - {detail.item_type}
+
+   // NEW (correct):
+   {detail.name} - ${detail.postCosting || detail.budget || detail.preCosting} ({detail.b2bPercent || detail.budgetPercent}% B2B)
+   ```
+
+2. **Calculation Logic** (`handleCostingDetailChange`):
+
+   ```jsx
+   // Uses fallback chain: postCosting → budget → preCosting
+   const costPerUnit =
+     selectedCosting.postCosting ||
+     selectedCosting.budget ||
+     selectedCosting.preCosting ||
+     "";
+   const b2bPercentValue =
+     selectedCosting.b2bPercent || selectedCosting.budgetPercent || "";
+   ```
+
+3. **Selected Section Display**:
+   ```jsx
+   // Shows: "YARN - $0.01 (0.17% B2B)" instead of "undefined - undefined"
+   const cost =
+     selectedDetail.postCosting ||
+     selectedDetail.budget ||
+     selectedDetail.preCosting ||
+     "0.00";
+   const percent =
+     selectedDetail.b2bPercent || selectedDetail.budgetPercent || "0.00";
+   return `${selectedDetail.name} - $${cost} (${percent}% B2B)`;
+   ```
+
+**Data Structure Reference:**
+
+```javascript
+// Order cost_details structure:
+{
+  id: 1,
+  name: "YARN", // Item name (not supplier)
+  preCosting: "0.01",
+  budget: "0.01",
+  budgetPercent: "0.00",
+  postCosting: "0.00", // May be empty initially
+  b2bPercent: "0.00", // May be empty initially
+  status: "draft"
+}
+```
 
 ---
 
@@ -491,14 +558,28 @@ Top-Right: "Create" button (blue)
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">-- Select Costing Detail --</option>
-                {costingDetails.map((detail) => (
-                  <option key={detail.id} value={detail.id}>
-                    {detail.supplier} - {detail.item_type}
-                  </option>
-                ))}
+                {costingDetails.map((detail, index) => {
+                  const cost =
+                    detail.postCosting ||
+                    detail.budget ||
+                    detail.preCosting ||
+                    "0.00";
+                  const percent =
+                    detail.b2bPercent || detail.budgetPercent || "0.00";
+                  return (
+                    <option key={detail.id || index} value={detail.id}>
+                      {detail.name || `Item ${detail.id || index + 1}`}
+                      {` - $${cost}`}
+                      {` (${percent}% B2B)`}
+                    </option>
+                  );
+                })}
               </select>
               <p className="text-xs text-gray-500 mt-2">
                 Costing depends on order
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Shows: Item Name - Cost (% B2B) from order costing
               </p>
             </div>
           </div>

@@ -28,6 +28,7 @@ class B2BLC extends Model
         'costing_detail_id',
         'pi_number',
         'supplier',
+        'supplier_id',
         'order_qty',
         'fob_value',
         'order_value',
@@ -86,6 +87,14 @@ class B2BLC extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Get the supplier that owns the B2B LC.
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     /**

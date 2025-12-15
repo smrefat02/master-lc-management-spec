@@ -10,6 +10,7 @@ export default function CreateB2BLC() {
   const [contracts, setContracts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [costingDetails, setCostingDetails] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export default function CreateB2BLC() {
     order_id: "",
     costing_detail_id: "",
     pi_number: "",
+    supplier_id: "",
     supplier: "",
     order_qty: "",
     fob_value: "",
@@ -27,7 +29,7 @@ export default function CreateB2BLC() {
     status: "draft",
   });
 
-  // Fetch contracts on mount
+  // Fetch contracts and suppliers on mount
   useEffect(() => {
     const fetchContracts = async () => {
       try {
@@ -40,7 +42,21 @@ export default function CreateB2BLC() {
       }
     };
 
+    const fetchSuppliers = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/suppliers");
+        if (!response.ok) throw new Error("Failed to fetch suppliers");
+        const data = await response.json();
+        console.log("Suppliers fetched:", data);
+        // API returns array directly when no pagination
+        setSuppliers(Array.isArray(data) ? data : data.data || []);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    };
+
     fetchContracts();
+    fetchSuppliers();
   }, []);
 
   // Fetch orders when contract changes
@@ -101,6 +117,7 @@ export default function CreateB2BLC() {
             }
           }
           console.log("Parsed costDetails:", costDetails);
+          console.log("Sample detail structure:", costDetails[0]);
         } catch (e) {
           console.error("Error parsing cost_details:", e);
           costDetails = [];
@@ -161,7 +178,7 @@ export default function CreateB2BLC() {
   const handleCostingDetailChange = (e) => {
     const costingDetailId = parseInt(e.target.value);
 
-    // Find selected costing detail and auto-fill supplier, fob (but NOT qty - keep order qty)
+    // Find selected costing detail and auto-fill based on costing data
     const selectedCosting = costingDetails.find(
       (detail) => detail.id === costingDetailId
     );
@@ -169,21 +186,29 @@ export default function CreateB2BLC() {
     console.log("Selected costing detail:", selectedCosting);
 
     if (selectedCosting) {
-      const fob = selectedCosting.fob || selectedCosting.fob_value || "";
-      const supplier =
-        selectedCosting.supplier || selectedCosting.supplier_name || "";
+      // Use postCosting, budget, or preCosting (whichever is available) as the cost per unit
+      const costPerUnit =
+        selectedCosting.postCosting ||
+        selectedCosting.budget ||
+        selectedCosting.preCosting ||
+        "";
+      const itemName = selectedCosting.name || "";
+      const b2bPercentValue =
+        selectedCosting.b2bPercent || selectedCosting.budgetPercent || "";
 
-      // Calculate order value using existing order_qty and new fob
+      // Calculate order value using existing order_qty and cost per unit
       const orderValue =
-        formData.order_qty && fob
-          ? (parseFloat(formData.order_qty) * parseFloat(fob)).toFixed(2)
+        formData.order_qty && costPerUnit
+          ? (parseFloat(formData.order_qty) * parseFloat(costPerUnit)).toFixed(
+              2
+            )
           : "";
 
       setFormData((prev) => ({
         ...prev,
         costing_detail_id: costingDetailId,
-        supplier: supplier,
-        fob_value: fob,
+        supplier: itemName, // Store item name as supplier for now
+        fob_value: costPerUnit,
         order_value: orderValue,
         b2b_percent:
           prev.post_pi_value && orderValue
@@ -191,7 +216,7 @@ export default function CreateB2BLC() {
                 (parseFloat(prev.post_pi_value) / parseFloat(orderValue)) *
                 100
               ).toFixed(2)
-            : "",
+            : b2bPercentValue,
       }));
     } else {
       setFormData((prev) => ({
@@ -429,22 +454,26 @@ export default function CreateB2BLC() {
                           No costing details found for this order
                         </option>
                       )}
-                      {costingDetails.map((detail, index) => (
-                        <option key={detail.id || index} value={detail.id}>
-                          {detail.supplier ||
-                            detail.supplier_name ||
-                            "Supplier"}{" "}
-                          -{" "}
-                          {detail.item_type ||
-                            detail.item ||
-                            detail.description ||
-                            `Item ${detail.id || index + 1}`}
-                        </option>
-                      ))}
+                      {costingDetails.map((detail, index) => {
+                        const cost =
+                          detail.postCosting ||
+                          detail.budget ||
+                          detail.preCosting ||
+                          "0.00";
+                        const percent =
+                          detail.b2bPercent || detail.budgetPercent || "0.00";
+                        return (
+                          <option key={detail.id || index} value={detail.id}>
+                            {detail.name || `Item ${detail.id || index + 1}`}
+                            {` - $${cost}`}
+                            {` (${percent}% B2B)`}
+                          </option>
+                        );
+                      })}
                     </select>
                     <p className="mt-1 text-xs text-gray-400">
                       {formData.order_id && costingDetails.length === 0
-                        ? "⚠️ This order has no costing details. Please add costing details to the order first."
+                        ? "WARNING: This order has no costing details. Please add costing details to the order first."
                         : "Costing depends on order"}
                     </p>
                     {errors.costing_detail_id && (
@@ -489,25 +518,26 @@ export default function CreateB2BLC() {
                           </span>
                           <span className="text-gray-900">
                             {formData.costing_detail_id
-                              ? costingDetails.find(
-                                  (d) =>
-                                    d.id ===
-                                    parseInt(formData.costing_detail_id)
-                                )
-                                ? `${
-                                    costingDetails.find(
-                                      (d) =>
-                                        d.id ===
-                                        parseInt(formData.costing_detail_id)
-                                    ).supplier
-                                  } - ${
-                                    costingDetails.find(
-                                      (d) =>
-                                        d.id ===
-                                        parseInt(formData.costing_detail_id)
-                                    ).item_type
-                                  }`
-                                : "-- Select Costing Detail --"
+                              ? (() => {
+                                  const selectedDetail = costingDetails.find(
+                                    (d) =>
+                                      d.id ===
+                                      parseInt(formData.costing_detail_id)
+                                  );
+                                  if (selectedDetail) {
+                                    const cost =
+                                      selectedDetail.postCosting ||
+                                      selectedDetail.budget ||
+                                      selectedDetail.preCosting ||
+                                      "0.00";
+                                    const percent =
+                                      selectedDetail.b2bPercent ||
+                                      selectedDetail.budgetPercent ||
+                                      "0.00";
+                                    return `${selectedDetail.name} - $${cost} (${percent}% B2B)`;
+                                  }
+                                  return "-- Select Costing Detail --";
+                                })()
                               : "-- Select Costing Detail --"}
                           </span>
                         </div>
@@ -634,18 +664,35 @@ export default function CreateB2BLC() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Supplier <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="text"
-                          name="supplier"
-                          value={formData.supplier}
-                          onChange={handleInputChange}
+                        <select
+                          name="supplier_id"
+                          value={formData.supplier_id}
+                          onChange={(e) => {
+                            const supplierId = e.target.value;
+                            const selectedSupplier = suppliers.find(
+                              (s) => s.id === parseInt(supplierId)
+                            );
+                            setFormData((prev) => ({
+                              ...prev,
+                              supplier_id: supplierId,
+                              supplier: selectedSupplier
+                                ? selectedSupplier.name
+                                : "",
+                            }));
+                          }}
                           required
-                          placeholder="Enter Supplier Name"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                        {errors.supplier && (
+                        >
+                          <option value="">-- Select Supplier --</option>
+                          {suppliers.map((supplier) => (
+                            <option key={supplier.id} value={supplier.id}>
+                              {supplier.code} - {supplier.name}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.supplier_id && (
                           <p className="mt-1 text-xs text-red-600">
-                            {errors.supplier[0]}
+                            {errors.supplier_id[0]}
                           </p>
                         )}
                       </div>

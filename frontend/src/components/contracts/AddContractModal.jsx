@@ -32,14 +32,14 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
 
       if (!buyersRes.ok) {
         const errorText = await buyersRes.text();
-        console.error("❌ Server response:", errorText);
+        console.error("[AddContractModal] Server response:", errorText);
         throw new Error(`Failed to fetch buyers (Status: ${buyersRes.status})`);
       }
 
       const buyersData = await buyersRes.json();
 
       console.log(
-        "✅ Buyers loaded:",
+        "[AddContractModal] Buyers loaded:",
         Array.isArray(buyersData) ? buyersData.length : 0
       );
 
@@ -48,8 +48,8 @@ export function AddContractModal({ isOpen, onClose, onCreated }) {
       // API returns array directly, not wrapped in {buyers: [...]}
       setBuyers(Array.isArray(buyersData) ? buyersData : []);
     } catch (err) {
-      console.error("❌ Failed to fetch initial data:", err);
-      console.error("❌ Error details:", err.message);
+      console.error("[AddContractModal] Failed to fetch initial data:", err);
+      console.error("[AddContractModal] Error details:", err.message);
       setError(
         `Failed to load form data: ${err.message}. Please check if the backend server is running on http://127.0.0.1:8000`
       );

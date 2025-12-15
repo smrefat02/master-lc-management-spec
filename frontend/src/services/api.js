@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
 // Create axios instance with default config
 const api = axios.create({
@@ -68,6 +68,31 @@ export const buyersApi = {
   // Get all buyers
   getAll: () => {
     return api.get("/buyers");
+  },
+};
+
+// Bank API endpoints
+export const banksAPI = {
+  // Get all banks
+  getAll: async () => {
+    try {
+      const response = await api.get("/banks");
+      return { success: true, data: response.data.data || response.data };
+    } catch (error) {
+      console.error("Failed to fetch banks:", error);
+      return { success: false, data: [] };
+    }
+  },
+
+  // Get single bank by ID
+  getById: async (id) => {
+    try {
+      const response = await api.get(`/banks/${id}`);
+      return { success: true, data: response.data.data || response.data };
+    } catch (error) {
+      console.error("Failed to fetch bank:", error);
+      return { success: false, data: null };
+    }
   },
 };
 

@@ -37,13 +37,13 @@ export default function ContractsOverview() {
         ...(statusFilter && { status: statusFilter }),
       };
       console.log(
-        "🚀 [ContractsOverview] Fetching contracts with params:",
+        "[ContractsOverview] Fetching contracts with params:",
         params
       );
       const data = await getContracts(params);
-      console.log("✅ [ContractsOverview] Received data:", data);
+      console.log("[ContractsOverview] Received data:", data);
       console.log(
-        "📊 [ContractsOverview] Contracts:",
+        "[ContractsOverview] Contracts:",
         data.contracts?.length,
         "Summary:",
         data.summary
@@ -57,17 +57,17 @@ export default function ContractsOverview() {
       setContracts(data.contracts || []);
       setPagination(data.pagination || null);
       setSummary(data.summary || null);
-      console.log("✅ [ContractsOverview] State updated successfully");
+      console.log("[ContractsOverview] State updated successfully");
     } catch (err) {
       setError("Failed to load contracts. Please try again.");
-      console.error("❌ [ContractsOverview] Error fetching contracts:", err);
+      console.error("[ContractsOverview] Error fetching contracts:", err);
       console.error(
-        "❌ [ContractsOverview] Error details:",
+        "[ContractsOverview] Error details:",
         err.message,
         err.response
       );
     } finally {
-      console.log("🏁 [ContractsOverview] Setting loading to false");
+      console.log("[ContractsOverview] Setting loading to false");
       setLoading(false);
     }
   };
@@ -156,7 +156,7 @@ export default function ContractsOverview() {
     return new Intl.NumberFormat("en-US").format(value || 0);
   };
 
-  console.log("🎨 [ContractsOverview] Rendering with state:", {
+  console.log("[ContractsOverview] Rendering with state:", {
     loading,
     contractsLength: contracts.length,
     hasError: !!error,
@@ -177,7 +177,7 @@ export default function ContractsOverview() {
   }
 
   if (error) {
-    console.log("❌ [ContractsOverview] Showing error state:", error);
+    console.log("[ContractsOverview] Showing error state:", error);
     return (
       <div className="min-h-screen bg-gray-100 p-6">
         <div className="text-center py-12">
@@ -193,7 +193,7 @@ export default function ContractsOverview() {
     );
   }
 
-  console.log("✅ [ContractsOverview] Rendering main dashboard");
+  console.log("[ContractsOverview] Rendering main dashboard");
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Header Bar */}

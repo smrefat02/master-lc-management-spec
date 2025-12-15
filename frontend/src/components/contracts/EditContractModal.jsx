@@ -29,10 +29,10 @@ export default function EditContractModal({
       const data = await response.json();
       // API returns array directly, not wrapped in {buyers: [...]}
       setBuyers(Array.isArray(data) ? data : []);
-      console.log("✅ Loaded buyers:", data.length);
+      console.log("[EditContractModal] Loaded buyers:", data.length);
     } catch (err) {
       setError("Failed to load buyers. Please try again.");
-      console.error("❌ Error fetching buyers:", err);
+      console.error("[EditContractModal] Error fetching buyers:", err);
     }
   };
 
@@ -128,8 +128,18 @@ export default function EditContractModal({
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <svg
+                        className="w-6 h-6 text-indigo-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
                       </svg>
                     </div>
                     <Dialog.Title
@@ -150,7 +160,6 @@ export default function EditContractModal({
                 </div>
 
                 <div className="px-6 py-4">
-
                   {error && (
                     <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-4">
                       <div className="flex">
@@ -158,22 +167,22 @@ export default function EditContractModal({
                           <svg
                             className="h-5 w-5 text-red-400"
                             viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-800">
-                          {error}
-                        </h3>
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">
+                            {error}
+                          </h3>
+                        </div>
                       </div>
                     </div>
-                  </div>
                   )}
 
                   <ContractForm

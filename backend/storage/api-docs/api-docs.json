@@ -20,27 +20,698 @@
         }
     ],
     "paths": {
+        "/api/b2b-lc": {
+            "get": {
+                "tags": [
+                    "B2B LC"
+                ],
+                "summary": "List all B2B LCs",
+                "description": "Get paginated list of Back-to-Back Letter of Credits with filters",
+                "operationId": "ec5103f14f90f87dbf8f1326e23dcff4",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "pi_number",
+                        "in": "query",
+                        "description": "Search by PI number",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "supplier",
+                        "in": "query",
+                        "description": "Filter by supplier",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "B2B LC"
+                ],
+                "summary": "Create new B2B LC",
+                "description": "Create a new Back-to-Back Letter of Credit",
+                "operationId": "184eaac5be2270b84ede48a54346cb09",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pi_number",
+                                    "order_id",
+                                    "costing_detail_id",
+                                    "issue_date",
+                                    "expiry_date"
+                                ],
+                                "properties": {
+                                    "pi_number": {
+                                        "type": "string",
+                                        "example": "PI-2025-001"
+                                    },
+                                    "order_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "costing_detail_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "issue_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-01"
+                                    },
+                                    "expiry_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "supplier_info": {
+                                        "type": "object"
+                                    },
+                                    "beneficiary_bank_info": {
+                                        "type": "object"
+                                    },
+                                    "pi_value": {
+                                        "type": "number",
+                                        "example": 50000
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "payment_terms": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "draft"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "B2B LC created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/b2b-lc/{id}": {
+            "get": {
+                "tags": [
+                    "B2B LC"
+                ],
+                "summary": "Get B2B LC details",
+                "description": "Get detailed information about a specific B2B LC",
+                "operationId": "3b3907d6ffa3cae729b9cb1fb868e66d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "B2B LC not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "B2B LC"
+                ],
+                "summary": "Update B2B LC",
+                "description": "Update an existing B2B LC",
+                "operationId": "c94f7c19cdd9edc5c58d50be7005a121",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "expiry_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "pi_value": {
+                                        "type": "number"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    },
+                                    "supplier_info": {
+                                        "type": "object"
+                                    },
+                                    "payment_terms": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "B2B LC updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "B2B LC not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "B2B LC"
+                ],
+                "summary": "Delete B2B LC",
+                "description": "Remove a B2B LC from the system",
+                "operationId": "f0eb2ec1b02dbcc237613e1ae365f2f9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "B2B LC deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "B2B LC not found"
+                    }
+                }
+            }
+        },
+        "/api/banks": {
+            "get": {
+                "tags": [
+                    "Banks"
+                ],
+                "summary": "List all active banks",
+                "description": "Get list of banks with optional search and status filter",
+                "operationId": "caa138ee4cdf9701a3ec3c3198e9f777",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by bank status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "active",
+                            "enum": [
+                                "active",
+                                "inactive"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name, SWIFT code, or country",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/banks/{id}": {
+            "get": {
+                "tags": [
+                    "Banks"
+                ],
+                "summary": "Get bank details",
+                "description": "Get detailed information about a specific bank",
+                "operationId": "a449b3fe60623680a294ad750ef03c8e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bank not found"
+                    }
+                }
+            }
+        },
         "/api/buyers": {
             "get": {
                 "tags": [
                     "Buyers"
                 ],
-                "summary": "Get list of buyers",
-                "description": "Returns a list of all buyers (id and name only) sorted alphabetically. Used for dropdown selections.",
+                "summary": "Get paginated list of buyers",
+                "description": "Returns a paginated list of buyers with optional search and status filter",
                 "operationId": "getBuyersList",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name, code, country, or email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "inactive"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Buyer"
-                                    }
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Create a new buyer",
+                "description": "Creates a new buyer record",
+                "operationId": "createBuyer",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "country",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "contact_person": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Buyer created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "country": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/buyers/{id}": {
+            "get": {
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Get a single buyer",
+                "description": "Returns a single buyer by ID",
+                "operationId": "getBuyer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Buyer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Buyer"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Buyer not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Update a buyer",
+                "description": "Updates an existing buyer",
+                "operationId": "updateBuyer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Buyer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "contact_person": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Buyer updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Buyer not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Delete a buyer",
+                "description": "Deletes a buyer if not referenced by contracts",
+                "operationId": "deleteBuyer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Buyer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Buyer deleted successfully"
+                    },
+                    "404": {
+                        "description": "Buyer not found"
+                    },
+                    "409": {
+                        "description": "Cannot delete - buyer is referenced by contracts"
                     }
                 }
             }
@@ -312,6 +983,153 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Update an existing contract",
+                "description": "Updates contract details. Contract number cannot be modified.",
+                "operationId": "updateContract",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Contract ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "buyer_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "contract_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-08"
+                                    },
+                                    "amendment_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-15",
+                                        "nullable": true
+                                    },
+                                    "total_orders": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 10
+                                    },
+                                    "order_quantity": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 34216
+                                    },
+                                    "value_usd": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "minimum": 0,
+                                        "example": 225803.23
+                                    },
+                                    "b2b_percent": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "maximum": 100,
+                                        "minimum": 0,
+                                        "example": 18.22
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "pending",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "active"
+                                    },
+                                    "remarks": {
+                                        "type": "string",
+                                        "example": "Updated remarks",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contract updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contract updated successfully"
+                                        },
+                                        "contract": {
+                                            "$ref": "#/components/schemas/Contract"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contract not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to update contract"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/contracts/next-number": {
@@ -376,6 +1194,1019 @@
                                         "error": {
                                             "type": "string",
                                             "example": "Error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc": {
+            "get": {
+                "tags": [
+                    "Master LC"
+                ],
+                "summary": "List all Master LCs",
+                "description": "Get paginated list of Master LCs with optional filters",
+                "operationId": "cb05ce17fd3bfba914690605c478601a",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by LC status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "applied",
+                                "issued_by_issuing_bank",
+                                "verified_by_advising_bank",
+                                "goods_shipped",
+                                "documents_received",
+                                "documents_forwarded",
+                                "documents_verified",
+                                "active",
+                                "expired",
+                                "rejected"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "lc_number",
+                        "in": "query",
+                        "description": "Search by LC number",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Master LC"
+                ],
+                "summary": "Create new Master LC",
+                "description": "Create a new Master Letter of Credit",
+                "operationId": "bbe91795043a87a59cce33405590e133",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lc_number_mode",
+                                    "issue_date",
+                                    "expiry_date",
+                                    "buyer_info",
+                                    "beneficiary_info",
+                                    "amount",
+                                    "currency"
+                                ],
+                                "properties": {
+                                    "contract_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "lc_number_mode": {
+                                        "type": "string",
+                                        "enum": [
+                                            "auto",
+                                            "manual"
+                                        ],
+                                        "example": "auto"
+                                    },
+                                    "lc_number": {
+                                        "type": "string",
+                                        "example": "LC-2025-001"
+                                    },
+                                    "issue_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-01"
+                                    },
+                                    "expiry_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "buyer_info": {
+                                        "type": "object"
+                                    },
+                                    "beneficiary_info": {
+                                        "type": "object"
+                                    },
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 100000
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "required_documents": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "terms_and_conditions": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Master LC created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}": {
+            "get": {
+                "tags": [
+                    "Master LC"
+                ],
+                "summary": "Get Master LC details",
+                "description": "Get detailed information about a specific Master LC",
+                "operationId": "348ff97d2ea95e8e7d1ce13dd566d561",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Master LC not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Master LC"
+                ],
+                "summary": "Update Master LC",
+                "description": "Update Master LC (only in draft status)",
+                "operationId": "281d7a7fe616d086c819b2b51e306f7d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "expiry_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "amount": {
+                                        "type": "number"
+                                    },
+                                    "terms_and_conditions": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Master LC updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Cannot edit in current status"
+                    },
+                    "404": {
+                        "description": "Master LC not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Master LC"
+                ],
+                "summary": "Delete Master LC",
+                "description": "Delete Master LC (only in draft status)",
+                "operationId": "13bfa122abd68c0791a9ca5f3a31d57d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Master LC deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Cannot delete in current status"
+                    },
+                    "404": {
+                        "description": "Master LC not found"
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/apply": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Apply for LC (Step 2)",
+                "description": "Importer applies for LC after agreeing on contract. Transitions from draft to applied.",
+                "operationId": "741fae69b42e965069dae1e9d4635ebc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "applicant_remarks": {
+                                        "type": "string",
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "LC application submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/issue": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Issue LC (Step 3)",
+                "description": "Issuing bank issues LC. Transitions from applied to issued_by_issuing_bank.",
+                "operationId": "20734ac201f43d659047658c5abedff7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "issuing_bank_id",
+                                    "issuing_bank_reference_no",
+                                    "issuing_bank_issue_date"
+                                ],
+                                "properties": {
+                                    "issuing_bank_id": {
+                                        "type": "integer"
+                                    },
+                                    "issuing_bank_reference_no": {
+                                        "type": "string"
+                                    },
+                                    "issuing_bank_issue_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "issuer_remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "LC issued successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/advise": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Advise/Verify LC (Step 4)",
+                "description": "Advising bank verifies LC. Transitions from issued_by_issuing_bank to verified_by_advising_bank.",
+                "operationId": "9356c338a0915f848d92942c82c9f97d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "advising_bank_id",
+                                    "advising_bank_verification_status"
+                                ],
+                                "properties": {
+                                    "advising_bank_id": {
+                                        "type": "integer"
+                                    },
+                                    "advising_bank_verification_status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "verified",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "advisor_remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "LC advised successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/ship-goods": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Ship Goods (Step 5)",
+                "description": "Record goods shipment. Transitions from verified_by_advising_bank to goods_shipped.",
+                "operationId": "cb6220a325b529b8ad5c867df9f04d9d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "shipping_date",
+                                    "carrier",
+                                    "bill_of_lading_no"
+                                ],
+                                "properties": {
+                                    "shipment_id": {
+                                        "type": "integer"
+                                    },
+                                    "shipping_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "carrier": {
+                                        "type": "string"
+                                    },
+                                    "vessel_name": {
+                                        "type": "string"
+                                    },
+                                    "bill_of_lading_no": {
+                                        "type": "string"
+                                    },
+                                    "port_of_loading": {
+                                        "type": "string"
+                                    },
+                                    "port_of_discharge": {
+                                        "type": "string"
+                                    },
+                                    "shipper_remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Goods shipment recorded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/documents/receive": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Receive Documents (Step 6)",
+                "description": "Record document receipt from exporter. Transitions from goods_shipped to documents_received.",
+                "operationId": "a8b4f3e6290c4d49ee04adff5bb39dd3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "received_documents"
+                                ],
+                                "properties": {
+                                    "received_documents": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "commercial_invoice",
+                                            "packing_list",
+                                            "bill_of_lading"
+                                        ]
+                                    },
+                                    "receiver_remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documents received",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/documents/forward": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Forward Documents (Step 7)",
+                "description": "Forward documents to issuing bank. Transitions from documents_received to documents_forwarded.",
+                "operationId": "a4bc3550e653145676008b4c5918f166",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "forwarded_to_bank_id"
+                                ],
+                                "properties": {
+                                    "forwarded_to_bank_id": {
+                                        "type": "integer"
+                                    },
+                                    "forwarder_remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documents forwarded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/documents/verify": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Verify Documents (Step 8)",
+                "description": "Issuing bank verifies documents. Transitions from documents_forwarded to documents_verified.",
+                "operationId": "1ea257857f1537f516578dd7439e2727",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "verification_status"
+                                ],
+                                "properties": {
+                                    "verification_status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "verified",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "verifier_remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documents verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/activate": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Activate LC (Step 9)",
+                "description": "Final activation of LC. Transitions from documents_verified to active.",
+                "operationId": "ef8de84413f89379f40212265bf0bebe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "LC activated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/reject": {
+            "put": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Reject LC",
+                "description": "Reject LC at any workflow stage. Transitions to rejected status.",
+                "operationId": "f84c074f0f14d15942b914c95988e34d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rejection_reason"
+                                ],
+                                "properties": {
+                                    "rejection_reason": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "LC rejected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-lc/{id}/timeline": {
+            "get": {
+                "tags": [
+                    "Master LC Workflow"
+                ],
+                "summary": "Get LC Timeline",
+                "description": "Retrieve complete workflow history with timestamps and actions.",
+                "operationId": "5c4d40446770200786f4fd3177060a41",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Timeline retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "step": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "string"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "actor": {
+                                                        "type": "string"
+                                                    },
+                                                    "remarks": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -1308,6 +3139,427 @@
                     }
                 }
             }
+        },
+        "/api/suppliers": {
+            "get": {
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "List all suppliers",
+                "description": "Get paginated list of suppliers with search and filter options",
+                "operationId": "43efd859bdde27a9e53c0afbe0891731",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name, code, or email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "inactive"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Create new supplier",
+                "description": "Create a new supplier record",
+                "operationId": "c1ee06af9e1f197a4aa49c1dd74c981c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "contact_person",
+                                    "email",
+                                    "country"
+                                ],
+                                "properties": {
+                                    "supplier_code": {
+                                        "type": "string",
+                                        "example": "SUP-2025-001"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "ABC Suppliers Ltd"
+                                    },
+                                    "contact_person": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@abc.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Business St"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "New York"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "USA"
+                                    },
+                                    "business_license": {
+                                        "type": "string"
+                                    },
+                                    "tax_id": {
+                                        "type": "string"
+                                    },
+                                    "bank_name": {
+                                        "type": "string"
+                                    },
+                                    "bank_account": {
+                                        "type": "string"
+                                    },
+                                    "swift_code": {
+                                        "type": "string"
+                                    },
+                                    "payment_terms": {
+                                        "type": "string"
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "default": "active",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Supplier created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/suppliers/{id}": {
+            "get": {
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Get supplier details",
+                "description": "Get detailed information about a specific supplier",
+                "operationId": "6be0f2389de5f1d79708c391d4cb0156",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Supplier not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Update supplier",
+                "description": "Update an existing supplier",
+                "operationId": "837f3815469c658c6255d5037dc09f5c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "contact_person": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string"
+                                    },
+                                    "bank_name": {
+                                        "type": "string"
+                                    },
+                                    "bank_account": {
+                                        "type": "string"
+                                    },
+                                    "swift_code": {
+                                        "type": "string"
+                                    },
+                                    "payment_terms": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Supplier updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Supplier not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Delete supplier",
+                "description": "Remove a supplier from the system (only if no associated B2B-LCs exist)",
+                "operationId": "4498097c7247888776baa62b3ff682c5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Supplier deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Cannot delete supplier with associated records",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Supplier not found"
+                    }
+                }
+            }
+        },
+        "/api/suppliers/generate-code": {
+            "get": {
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Generate supplier code",
+                "description": "Generate the next available supplier code automatically",
+                "operationId": "c9aee1bc32299ddc4e364bd342d08f89",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "SUP-2025-0042"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1777,6 +4029,26 @@
         {
             "name": "Shipments",
             "description": "Shipment management endpoints - Track shipments against contracts and orders with summary statistics"
+        },
+        {
+            "name": "B2B LC",
+            "description": "B2B LC"
+        },
+        {
+            "name": "Banks",
+            "description": "Banks"
+        },
+        {
+            "name": "Master LC",
+            "description": "Master LC"
+        },
+        {
+            "name": "Master LC Workflow",
+            "description": "Master LC Workflow"
+        },
+        {
+            "name": "Suppliers",
+            "description": "Suppliers"
         }
     ]
 }

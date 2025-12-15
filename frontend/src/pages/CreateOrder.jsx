@@ -326,7 +326,7 @@ export default function CreateOrder() {
               updatedItem.budgetPercent = "0.00";
               if (budgetValue > 0) {
                 console.warn(
-                  "⚠️ Cannot calculate Budget (%). Please enter Order Value first!"
+                  "WARNING: Cannot calculate Budget (%). Please enter Order Value first!"
                 );
               }
             }
@@ -351,7 +351,7 @@ export default function CreateOrder() {
               updatedItem.b2bPercent = "0.00";
               if (postCostingValue > 0) {
                 console.warn(
-                  "⚠️ Cannot calculate B2B (%). Please enter Order Value first!"
+                  "WARNING: Cannot calculate B2B (%). Please enter Order Value first!"
                 );
               }
             }

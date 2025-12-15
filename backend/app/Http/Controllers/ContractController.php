@@ -303,6 +303,61 @@ class ContractController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *     path="/api/contracts/{id}",
+     *     operationId="updateContract",
+     *     tags={"Contracts"},
+     *     summary="Update an existing contract",
+     *     description="Updates contract details. Contract number cannot be modified.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Contract ID",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="buyer_id", type="integer", example=3),
+     *             @OA\Property(property="contract_date", type="string", format="date", example="2025-12-08"),
+     *             @OA\Property(property="amendment_date", type="string", format="date", nullable=true, example="2025-12-15"),
+     *             @OA\Property(property="total_orders", type="integer", minimum=0, example=10),
+     *             @OA\Property(property="order_quantity", type="integer", minimum=0, example=34216),
+     *             @OA\Property(property="value_usd", type="number", format="decimal", minimum=0, example=225803.23),
+     *             @OA\Property(property="b2b_percent", type="number", format="decimal", minimum=0, maximum=100, example=18.22),
+     *             @OA\Property(property="status", type="string", enum={"draft", "active", "pending", "completed", "cancelled"}, example="active"),
+     *             @OA\Property(property="remarks", type="string", nullable=true, example="Updated remarks")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contract updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Contract updated successfully"),
+     *             @OA\Property(property="contract", ref="#/components/schemas/Contract")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Contract not found",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Failed to update contract"),
+     *             @OA\Property(property="error", type="string", example="Error details")
+     *         )
+     *     )
+     * )
+     *
      * Update an existing contract.
      */
     public function update(UpdateContractRequest $request, $id)
